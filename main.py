@@ -40,7 +40,7 @@ HTML_CONTENT = r"""
       line-height: 1.5;
     }
 
-    /* PANTALLAS DE ENTRADA */
+    /* AUTENTICACIÓN Y ENTRADA */
     .welcome-wrapper {
       min-height: calc(100vh - 3rem);
       display: flex;
@@ -92,7 +92,7 @@ HTML_CONTENT = r"""
 
     .btn-sm { padding: 0.5rem 0.9rem; font-size: 0.9rem; border-radius: 8px; }
 
-    /* APLICACIÓN PRINCIPAL */
+    /* PANEL PRINCIPAL */
     .main-app { display: none; width: 100%; flex-direction: column; gap: 1.5rem; max-width: 1400px; margin: 0 auto; }
 
     .header-top {
@@ -117,7 +117,7 @@ HTML_CONTENT = r"""
     .stat-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; }
     .stat-value { font-size: 2rem; font-weight: 800; margin-top: 0.25rem; }
 
-    /* CONTROLES SUPERIORES (BARRA DE AGREGAR CATEGO / GASTOS) */
+    /* PANEL SUPERIOR DE OPCIONES DE AGREGAR */
     .top-controls-panel {
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -170,7 +170,7 @@ HTML_CONTENT = r"""
     }
     .field-group input:focus, .field-group select:focus { border-color: var(--primary-navy); }
 
-    /* TABLA ESTILO EXCEL */
+    /* TABLA INTERACTIVA EXCEL */
     .excel-container {
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -232,16 +232,6 @@ HTML_CONTENT = r"""
       box-shadow: inset 0 0 0 2px var(--primary-navy);
     }
 
-    .badge-cat {
-      display: inline-block;
-      padding: 0.25rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      background-color: #E0E7FF;
-      color: #3730A3;
-    }
-
     .btn-delete-row {
       background: none;
       border: none;
@@ -285,7 +275,7 @@ HTML_CONTENT = r"""
     </div>
   </div>
 
-  <!-- SELECCIÓN -->
+  <!-- SELECCIÓN DE PERSONA -->
   <div class="welcome-wrapper" id="vista-inicio" style="display: none;">
     <div class="welcome-container">
       <h1 class="welcome-title">Gestión de Gastos</h1>
@@ -307,7 +297,7 @@ HTML_CONTENT = r"""
     </div>
   </div>
 
-  <!-- PANEL PRINCIPAL (PLANILLA TIPO EXCEL CON CONTROLES) -->
+  <!-- PLANILLA Y CONTROLES -->
   <div class="main-app" id="vista-panel">
     <header class="header-top">
       <div class="header-user-info">
@@ -320,7 +310,7 @@ HTML_CONTENT = r"""
       <button class="btn btn-outline" onclick="volverAInicio()">🏠 Volver al Inicio</button>
     </header>
 
-    <!-- RESUMEN DE BALANCE -->
+    <!-- RESUMEN -->
     <section class="summary-grid">
       <div class="stat-card balance">
         <span class="stat-title">Balance Disponible</span>
@@ -339,7 +329,7 @@ HTML_CONTENT = r"""
       </div>
     </section>
 
-    <!-- PANEL SUPERIOR DE CONTROLES Y AGREGADO RÁPIDO -->
+    <!-- BARRA DE CONTROLES SUPERIORES -->
     <section class="top-controls-panel">
       <div class="controls-title">⚡ Opciones de Registro Rápido</div>
       <div class="controls-grid">
@@ -382,7 +372,7 @@ HTML_CONTENT = r"""
       </div>
     </section>
 
-    <!-- TABLA TIPO EXCEL -->
+    <!-- TABLA INTERACTIVA EXCEL -->
     <section class="excel-container">
       <div class="table-wrapper">
         <table class="excel-table">
@@ -397,7 +387,6 @@ HTML_CONTENT = r"""
             </tr>
           </thead>
           <tbody id="tbody-excel">
-            <!-- Filas dinámicas -->
           </tbody>
         </table>
       </div>
@@ -469,7 +458,7 @@ HTML_CONTENT = r"""
     }
 
     function obtenerClaveStorage() {
-      return `usuario_gastos_${usuarioActual}_${nombreUsuarioClave}`;
+      return 'usuario_gastos_' + usuarioActual + '_' + nombreUsuarioClave;
     }
 
     function parsearMontoFlexible(montoStr) {
@@ -486,7 +475,7 @@ HTML_CONTENT = r"""
       return '$' + monto.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // CARGAR Y GUARDAR
+    // CARGA Y GUARDADO DE DATOS
     function cargarDatosUsuario() {
       try {
         const datosGuardados = localStorage.getItem(obtenerClaveStorage());
@@ -558,7 +547,7 @@ HTML_CONTENT = r"""
       const concepto = document.getElementById('input-concepto').value.trim();
       const monto = parsearMontoFlexible(document.getElementById('input-monto').value);
 
-      datosUsuario.listaGastos.unshift({ id: Date.now(), fecha, categoria, concepto, monto });
+      datosUsuario.listaGastos.unshift({ id: Date.now(), fecha: fecha, categoria: categoria, concepto: concepto, monto: monto });
       guardarDatosUsuario();
       actualizarPantallaPanel();
 
@@ -596,13 +585,13 @@ HTML_CONTENT = r"""
       renderTablaExcel();
     }
 
-    // RENDER DE TABLA EXCEL + EDICIÓN DIRECTA
+    // RENDERIZADO Y EDICIÓN DE TABLA
     function renderTablaExcel() {
       const tbody = document.getElementById('tbody-excel');
       tbody.innerHTML = '';
 
       if (datosUsuario.listaGastos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">La planilla está vacía. Agrega items desde el panel superior.</td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">La planilla está vacía. Agrega items desde el panel superior.</td></tr>';
         return;
       }
 
@@ -611,9 +600,8 @@ HTML_CONTENT = r"""
         tr.draggable = true;
         tr.dataset.index = index;
 
-        // Opciones de Select de Categoría dentro de la celda
         let catOptionsHTML = datosUsuario.categorias.map(c => 
-          `<option value="${c}" ${c === item.categoria ? 'selected' : ''}>${c}</option>`
+          '<option value="' + c + '" ' + (c === item.categoria ? 'selected' : '') + '>' + c + '</option>'
         ).join('');
 
         tr.innerHTML = `
@@ -662,7 +650,7 @@ HTML_CONTENT = r"""
       }
     }
 
-    // LÓGICA DE DRAG & DROP (ARRASTRAR Y MOVER FILAS)
+    // ARRASTRAR Y MOVER FILAS (DRAG & DROP)
     let dragSrcIndex = null;
 
     function handleDragStart(e) {
@@ -694,7 +682,7 @@ HTML_CONTENT = r"""
       this.classList.remove('dragging');
     }
 
-    // EXCEL EXTERNO
+    // ARCHIVOS EXCEL EXTERNOS
     function subirExcelWeb(input) {
       if (!input.files || !input.files[0]) return;
 
