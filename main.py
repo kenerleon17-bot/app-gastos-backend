@@ -297,111 +297,66 @@ HTML_CONTENT = r"""
     </div>
   </div>
 
-  <!-- PLANILLA Y CONTROLES -->
-  <div class="main-app" id="vista-panel">
-    <header class="header-top">
-      <div class="header-user-info">
-        <span class="user-badge" id="badge-usuario">Persona</span>
-        <div>
-          <h1 style="font-size: 1.5rem; color: var(--primary-navy); font-weight: 800;">Planilla Interactiva de Gastos</h1>
-          <p style="color: var(--text-muted); font-size: 0.9rem;">Edita directamente sobre las celdas o arrastra las filas para reordenarlas</p>
+<!-- PLANTILLA GASTOS -->
+  <div id="vista-plantilla-gastos" class="hidden" style="height: 100vh; display: flex; flex-direction: column;">
+    <header class="top-bar">
+      <div class="brand-section">
+        <span class="brand-title">📊 Control Mensual</span>
+        <span id="user-display" style="font-size: 0.8rem; background: #e1dfdd; padding: 0.2rem 0.5rem; border-radius: 12px; font-weight: 600;">Usuario</span>
+        
+        <div class="month-picker-container">
+          <span class="month-picker-label">📅 Mes:</span>
+          <input type="month" id="selected-month" class="month-picker-input" value="2026-08" onchange="cambiarMes(this.value)">
         </div>
       </div>
-      <button class="btn btn-outline" onclick="volverAInicio()">🏠 Volver al Inicio</button>
+
+      <div class="top-actions">
+        <button class="btn btn-outline" onclick="renovarMes()">🔄 Clonar a Siguiente Mes</button>
+        <button class="btn btn-excel" onclick="agregarFila()">+ Nueva Fila</button>
+        <button class="btn btn-outline" onclick="volverAMenu()">⬅️ Menú</button>
+      </div>
     </header>
 
-    <!-- RESUMEN -->
-    <section class="summary-grid">
-      <div class="stat-card balance">
-        <span class="stat-title">Balance Disponible</span>
-        <div class="stat-value" id="val-balance">$0,00</div>
-      </div>
-      <div class="stat-card ingresos">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span class="stat-title">Ingresos Mensuales</span>
-          <button class="btn btn-outline btn-sm" onclick="modificarIngreso()">✏️ Editar</button>
-        </div>
-        <div class="stat-value" id="val-ingresos" style="color: var(--accent-green);">$0,00</div>
-      </div>
-      <div class="stat-card gastos">
-        <span class="stat-title">Total Gastos</span>
-        <div class="stat-value" id="val-gastos" style="color: var(--accent-red);">$0,00</div>
-      </div>
-    </section>
-
-    <!-- BARRA DE CONTROLES SUPERIORES -->
-    <section class="top-controls-panel">
-      <div class="controls-title">⚡ Opciones de Registro Rápido</div>
-      <div class="controls-grid">
-        
-        <!-- AGREGAR GASTO -->
-        <form class="add-gasto-form" onsubmit="agregarGastoFila(event)">
-          <div class="field-group">
-            <label>Fecha</label>
-            <input type="date" id="input-fecha" required>
-          </div>
-          <div class="field-group">
-            <label>Categoría</label>
-            <select id="select-categoria" required>
-              <option value="Servicios">Servicios</option>
-              <option value="Alquiler">Alquiler</option>
-              <option value="Comida">Comida</option>
-              <option value="Varios">Varios</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <label>Concepto / Descripción</label>
-            <input type="text" id="input-concepto" placeholder="Ej: Pago de Luz" required autocomplete="off">
-          </div>
-          <div class="field-group">
-            <label>Monto ($)</label>
-            <input type="text" id="input-monto" placeholder="Ej: 15000" required autocomplete="off">
-          </div>
-          <button type="submit" class="btn btn-navy">+ Añadir a Tabla</button>
-        </form>
-
-        <!-- AGREGAR CATEGORÍA -->
-        <form class="add-cat-form" onsubmit="crearNuevaCategoria(event)">
-          <div class="field-group" style="flex-grow: 1;">
-            <label>Nueva Categoría</label>
-            <input type="text" id="input-nueva-cat" placeholder="Ej: Gimnasio" required autocomplete="off">
-          </div>
-          <button type="submit" class="btn btn-outline">+ Crear</button>
-        </form>
-
-      </div>
-    </section>
-
-    <!-- TABLA INTERACTIVA EXCEL -->
-    <section class="excel-container">
+    <main class="sheet-container">
       <div class="table-wrapper">
-        <table class="excel-table">
+        <table class="excel-table" id="finance-table">
           <thead>
             <tr>
-              <th style="width: 40px; text-align: center;">Mover</th>
-              <th style="width: 130px;">Fecha</th>
-              <th style="width: 180px;">Categoría</th>
-              <th>Concepto / Descripción</th>
-              <th style="width: 160px; text-align: right;">Monto ($)</th>
-              <th style="width: 50px; text-align: center;">Acción</th>
+              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Fecha Venc.</th>
+              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Categoría</th>
+              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Concepto / Detalle</th>
+              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Modo / Cuotas</th>
+              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Fin de Pago</th>
+              <th draggable="true" style="text-align: right;"><span class="col-drag-handle">⋮⋮</span>Monto ($)</th>
+              <th draggable="true" style="text-align: center;"><span class="col-drag-handle">⋮⋮</span>Estado (Fijar)</th>
+              <th style="width: 40px; text-align: center;">⚙️</th>
             </tr>
           </thead>
-          <tbody id="tbody-excel">
+          <tbody id="table-body">
+            <!-- Carga dinámica -->
           </tbody>
         </table>
       </div>
-    </section>
-  </div>
 
-  <!-- VISTA EXCEL STANDALONE -->
-  <div id="vista-excel-standalone" class="excel-standalone-view">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-      <strong id="archivo-nombre" style="color: var(--primary-navy); font-size: 1.5rem;">Documento Importado</strong>
-      <button class="btn btn-outline" onclick="cerrarVistaExcelStandalone()">🏠 Volver al Inicio</button>
-    </div>
-    <div id="tabla-wrapper-standalone" class="table-wrapper"></div>
-  </div>
+      <footer class="summary-footer">
+        <div class="summary-card">
+          <span class="summary-title">💵 Ingresos del Mes</span>
+          <input type="text" id="ingresos-input" class="summary-input" value="350.000,00" oninput="marcarIngresoModificado()">
+        </div>
 
+        <div class="summary-card">
+          <span class="summary-title">📉 Total Gastos</span>
+          <span id="total-gastos-val" class="summary-value" style="color: var(--accent-red);">$0,00</span>
+        </div>
+
+        <div class="summary-card highlight" id="ahorro-card">
+          <span class="summary-title">💰 Disponible para Ahorro</span>
+          <span id="total-ahorro-val" class="summary-value" style="color: var(--accent-green);">$0,00</span>
+        </div>
+      </footer>
+    </main>
+  </div>
+  
   <script>
     let modoRegistro = false;
     let usuarioActual = null;
