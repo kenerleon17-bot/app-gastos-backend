@@ -4,7 +4,7 @@ from flask import Flask, render_template_string, request, jsonify
 
 app = Flask(__name__)
 
-# Configurar tamaño máximo de archivos subidos (ej. 16MB)
+# Configurar tamaño máximo de archivos subidos (16MB)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 HTML_CONTENT = r"""
