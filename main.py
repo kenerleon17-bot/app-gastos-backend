@@ -4,7 +4,6 @@ from flask import Flask, render_template_string, request, jsonify
 
 app = Flask(__name__)
 
-# Configurar tamaño máximo de archivos subidos (16MB)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 HTML_CONTENT = r"""
@@ -332,7 +331,7 @@ HTML_CONTENT = r"""
   <div class="welcome-wrapper" id="vista-inicio" style="display: none;">
     <div class="welcome-container">
       <h1 class="welcome-title">Gestión de Gastos</h1>
-      <p class="welcome-subtitle">Selecciona una opción para comenzar</p>
+      <p class="welcome-subtitle">Selecciona una opción para comenzar (<span id="user-display-email" style="color: var(--primary-navy); font-weight: bold;"></span>)</p>
 
       <div class="form-user">
         <div>
@@ -497,7 +496,7 @@ HTML_CONTENT = r"""
           alert('El correo ya está registrado.');
           return;
         }
-        usuarios[email] = { password: pass, ingresos: 0, gastos: 0, listaGastos: [] };
+        usuarios[email] = { password: pass };
         localStorage.setItem('usuarios_app', JSON.stringify(usuarios));
         alert('Cuenta creada exitosamente. Ahora puedes iniciar sesión.');
         alternarModoAuth();
@@ -515,6 +514,7 @@ HTML_CONTENT = r"""
     function cargarPanelUsuario() {
       document.getElementById('vista-auth').style.display = 'none';
       document.getElementById('vista-inicio').style.display = 'flex';
+      document.getElementById('user-display-email').innerText = usuarioActual;
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -528,6 +528,10 @@ HTML_CONTENT = r"""
     function cerrarSesion() {
       localStorage.removeItem('sesion_activa');
       location.reload();
+    }
+
+    function obtenerClaveStorage() {
+      return `usuario_gastos_${usuarioActual}_${nombreUsuarioClave}`;
     }
 
     function parsearMontoFlexible(montoStr) {
@@ -554,7 +558,7 @@ HTML_CONTENT = r"""
 
     function cargarDatosUsuario() {
       try {
-        const datosGuardados = localStorage.getItem('usuario_gastos_' + nombreUsuarioClave);
+        const datosGuardados = localStorage.getItem(obtenerClaveStorage());
         datosUsuario = datosGuardados ? JSON.parse(datosGuardados) : { ingresos: 0, gastos: 0, listaGastos: [] };
       } catch (e) {
         datosUsuario = { ingresos: 0, gastos: 0, listaGastos: [] };
@@ -563,9 +567,9 @@ HTML_CONTENT = r"""
     }
 
     function guardarDatosUsuario() {
-      if (nombreUsuarioClave) {
+      if (nombreUsuarioClave && usuarioActual) {
         try {
-          localStorage.setItem('usuario_gastos_' + nombreUsuarioClave, JSON.stringify(datosUsuario));
+          localStorage.setItem(obtenerClaveStorage(), JSON.stringify(datosUsuario));
         } catch (e) {}
       }
     }
