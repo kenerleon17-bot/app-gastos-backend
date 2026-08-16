@@ -16,7 +16,7 @@ HTML_CONTENT = r"""
 
   <style>
     :root {
-      --bg-main: #F1F5F9;
+      --bg-main: #F8FAFC;
       --bg-card: #FFFFFF;
       --primary-navy: #1E40AF;
       --primary-hover: #1D4ED8;
@@ -24,7 +24,8 @@ HTML_CONTENT = r"""
       --accent-red: #DC2626;
       --text-main: #0F172A;
       --text-muted: #64748B;
-      --border-color: #CBD5E1;
+      --border-color: #E2E8F0;
+      --table-border: #CBD5E1;
       --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
@@ -39,6 +40,7 @@ HTML_CONTENT = r"""
       line-height: 1.5;
     }
 
+    /* PANTALLAS DE ENTRADA */
     .welcome-wrapper {
       min-height: calc(100vh - 3rem);
       display: flex;
@@ -48,70 +50,36 @@ HTML_CONTENT = r"""
 
     .welcome-container {
       width: 100%;
-      max-width: 850px;
+      max-width: 800px;
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 24px;
-      padding: 4.5rem 4rem;
-      box-shadow: 0 25px 30px -5px rgba(0,0,0,0.07);
+      border-radius: 20px;
+      padding: 3.5rem 3rem;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05);
       text-align: center;
     }
 
-    .welcome-title {
-      font-size: 3rem;
-      color: var(--primary-navy);
-      font-weight: 800;
-      margin-bottom: 0.75rem;
-    }
+    .welcome-title { font-size: 2.5rem; color: var(--primary-navy); font-weight: 800; margin-bottom: 0.5rem; }
+    .welcome-subtitle { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2.5rem; }
 
-    .welcome-subtitle {
-      color: var(--text-muted);
-      font-size: 1.25rem;
-      margin-bottom: 3.5rem;
-    }
-
-    .form-user {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-      text-align: left;
-    }
-
-    .form-user label {
-      font-weight: 700;
-      font-size: 1.2rem;
-      color: var(--text-main);
-    }
-
-    .form-user input {
-      width: 100%;
-      padding: 1.3rem 1.4rem;
-      border: 2px solid var(--border-color);
-      border-radius: 14px;
-      font-size: 1.25rem;
-      outline: none;
-    }
-
+    .form-user { display: flex; flex-direction: column; gap: 1.5rem; text-align: left; }
+    .form-user label { font-weight: 700; font-size: 1.1rem; color: var(--text-main); }
+    .form-user input { width: 100%; padding: 1rem 1.2rem; border: 2px solid var(--border-color); border-radius: 12px; font-size: 1.1rem; outline: none; }
     .form-user input:focus { border-color: var(--primary-navy); }
 
-    .btn-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-      margin-top: 1rem;
-    }
+    .btn-stack { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
 
     .btn {
-      padding: 1.1rem 1.8rem;
-      border-radius: 14px;
+      padding: 0.9rem 1.5rem;
+      border-radius: 12px;
       font-weight: 600;
-      font-size: 1.1rem;
+      font-size: 1rem;
       cursor: pointer;
       border: none;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
       transition: all 0.2s ease;
       text-decoration: none;
     }
@@ -119,189 +87,179 @@ HTML_CONTENT = r"""
     .btn-navy { background-color: var(--primary-navy); color: #ffffff; }
     .btn-navy:hover { background-color: var(--primary-hover); }
 
-    .btn-outline {
-      background-color: #FFFFFF;
-      border: 2px solid var(--border-color);
-      color: var(--text-main);
-    }
+    .btn-outline { background-color: #FFFFFF; border: 2px solid var(--border-color); color: var(--text-main); }
     .btn-outline:hover { background-color: #F8FAFC; border-color: #94A3B8; }
 
-    .main-app {
-      display: none;
-      width: 100%;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
+    .btn-sm { padding: 0.5rem 0.9rem; font-size: 0.9rem; border-radius: 8px; }
+
+    /* APLICACIÓN PRINCIPAL */
+    .main-app { display: none; width: 100%; flex-direction: column; gap: 1.5rem; max-width: 1400px; margin: 0 auto; }
 
     .header-top {
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 18px;
-      padding: 1.25rem 2rem;
+      border-radius: 16px;
+      padding: 1rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
     .header-user-info { display: flex; align-items: center; gap: 1rem; }
+    .user-badge { background-color: #EFF6FF; color: var(--primary-navy); padding: 0.4rem 0.8rem; border-radius: 10px; font-weight: 800; font-size: 1.2rem; border: 1px solid #BFDBFE; }
 
-    .user-badge {
-      background-color: #EFF6FF;
-      color: var(--primary-navy);
-      padding: 0.5rem 1rem;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 1.4rem;
-      border: 1px solid #BFDBFE;
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .stat-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 1.25rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .stat-card.balance { border-left: 5px solid var(--primary-navy); }
+    .stat-card.ingresos { border-left: 5px solid var(--accent-green); }
+    .stat-card.gastos { border-left: 5px solid var(--accent-red); }
+    .stat-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; }
+    .stat-value { font-size: 2rem; font-weight: 800; margin-top: 0.25rem; }
+
+    /* CONTROLES SUPERIORES (BARRA DE AGREGAR CATEGO / GASTOS) */
+    .top-controls-panel {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
     }
 
-    .header-title-text h1 { font-size: 1.8rem; color: var(--primary-navy); font-weight: 800; }
-    .header-title-text p { color: var(--text-muted); font-size: 1rem; }
+    .controls-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--primary-navy);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
 
-    .summary-grid {
+    .controls-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 2fr 1fr;
       gap: 1.5rem;
     }
 
-    .stat-card {
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 1.75rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    .add-gasto-form {
+      display: grid;
+      grid-template-columns: 1.2fr 1.5fr 2fr 1.2fr auto;
+      gap: 0.75rem;
+      align-items: end;
+    }
+
+    .add-cat-form {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      gap: 0.5rem;
+      align-items: end;
+      border-left: 2px solid var(--border-color);
+      padding-left: 1.5rem;
     }
 
-    .stat-card.balance { border-left: 6px solid var(--primary-navy); }
-    .stat-card.ingresos { border-left: 6px solid var(--accent-green); }
-    .stat-card.gastos { border-left: 6px solid var(--accent-red); }
-
-    .stat-header { display: flex; justify-content: space-between; align-items: center; }
-
-    .stat-title {
-      font-size: 0.95rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-muted);
-      font-weight: 700;
-    }
-
-    .stat-value { font-size: 2.5rem; font-weight: 800; margin-top: 0.5rem; color: var(--text-main); }
-
-    .edit-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
-      color: var(--text-muted);
-      padding: 0.2rem 0.5rem;
-      border-radius: 6px;
-    }
-    .edit-btn:hover { background-color: #F1F5F9; color: var(--primary-navy); }
-
-    .input-ingreso {
-      font-size: 1.8rem;
-      font-weight: 800;
-      width: 100%;
-      padding: 0.4rem 0.6rem;
-      border: 2px solid var(--primary-navy);
+    .field-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .field-group label { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); }
+    .field-group input, .field-group select {
+      padding: 0.7rem 0.9rem;
+      border: 1px solid var(--table-border);
       border-radius: 8px;
-      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      outline: none;
+      background: #FFFFFF;
     }
+    .field-group input:focus, .field-group select:focus { border-color: var(--primary-navy); }
 
-    .panel-box {
+    /* TABLA ESTILO EXCEL */
+    .excel-container {
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 18px;
-      padding: 2rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
-      flex-grow: 1;
-    }
-
-    .panel-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-    .panel-title { font-size: 1.5rem; font-weight: 700; color: var(--primary-navy); }
-
-    .gastos-list-table { width: 100%; border-collapse: collapse; }
-    .gastos-list-table th, .gastos-list-table td {
-      padding: 1.2rem 1.4rem;
-      text-align: left;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 1.1rem;
-    }
-    .gastos-list-table th { background-color: #F8FAFC; color: var(--text-muted); font-weight: 700; }
-
-    .excel-standalone-view {
-      display: none;
-      width: 100%;
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-top: 6px solid var(--primary-navy);
       border-radius: 16px;
-      padding: 2.25rem;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
     }
 
-    .excel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border-color);
+    .table-wrapper { overflow-x: auto; max-height: 60vh; }
+
+    .excel-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      background: #FFFFFF;
     }
 
-    .table-wrapper { overflow-x: auto; max-height: 70vh; overflow-y: auto; }
-
-    .excel-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 1.1rem; }
     .excel-table th {
       background-color: #F1F5F9;
       color: var(--primary-navy);
       font-weight: 700;
-      padding: 1.2rem 1.4rem;
-      border-bottom: 2px solid var(--border-color);
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--table-border);
+      text-align: left;
       position: sticky;
       top: 0;
       z-index: 10;
     }
-    .excel-table td { padding: 1rem 1.4rem; border-bottom: 1px solid var(--border-color); }
-    .excel-table tr:hover { background-color: #F8FAFC; }
 
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(15, 23, 42, 0.65);
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
+    .excel-table td {
+      padding: 0.7rem 1rem;
+      border: 1px solid var(--table-border);
+      color: var(--text-main);
+      background-color: #FFFFFF;
     }
 
-    .modal-content {
-      background: var(--bg-card);
-      border-radius: 20px;
-      padding: 3.5rem;
-      width: 90%;
-      max-width: 720px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+    .excel-table tr.dragging {
+      opacity: 0.4;
+      background-color: #E2E8F0;
     }
 
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-    .form-group { margin-bottom: 1.75rem; }
-    .form-group label { display: block; font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text-main); }
-    .form-control { width: 100%; padding: 1.2rem 1.3rem; border: 2px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; outline: none; }
-    .form-control:focus { border-color: var(--primary-navy); }
+    .excel-table tr:hover td {
+      background-color: #F8FAFC;
+    }
 
-    .empty-msg { color: var(--text-muted); text-align: center; padding: 4rem 2rem; font-style: italic; font-size: 1.2rem; }
+    .drag-handle {
+      cursor: grab;
+      text-align: center;
+      color: var(--text-muted);
+      font-weight: bold;
+      user-select: none;
+      width: 40px;
+    }
+    .drag-handle:active { cursor: grabbing; }
+
+    .editable-cell { outline: none; }
+    .editable-cell:focus {
+      background-color: #EFF6FF !important;
+      box-shadow: inset 0 0 0 2px var(--primary-navy);
+    }
+
+    .badge-cat {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background-color: #E0E7FF;
+      color: #3730A3;
+    }
+
+    .btn-delete-row {
+      background: none;
+      border: none;
+      color: var(--accent-red);
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+    .btn-delete-row:hover { opacity: 0.7; }
+
+    .excel-standalone-view {
+      display: none; width: 100%; background-color: var(--bg-card);
+      border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem;
+    }
   </style>
 </head>
 <body>
 
-  <!-- PANTALLA DE AUTENTICACIÓN -->
+  <!-- AUTENTICACIÓN -->
   <div class="welcome-wrapper" id="vista-auth">
     <div class="welcome-container">
       <h1 class="welcome-title" id="auth-titulo">Iniciar Sesión</h1>
@@ -327,7 +285,7 @@ HTML_CONTENT = r"""
     </div>
   </div>
 
-  <!-- PANTALLA DE SELECCIÓN -->
+  <!-- SELECCIÓN -->
   <div class="welcome-wrapper" id="vista-inicio" style="display: none;">
     <div class="welcome-container">
       <h1 class="welcome-title">Gestión de Gastos</h1>
@@ -336,147 +294,132 @@ HTML_CONTENT = r"""
       <div class="form-user">
         <div>
           <label for="nombre-usuario">1. Nombre de la persona</label>
-          <input type="text" id="nombre-usuario" placeholder="Ej: Joaquín" style="margin-top: 0.75rem;" autocomplete="off">
+          <input type="text" id="nombre-usuario" placeholder="Ej: Joaquín" autocomplete="off">
         </div>
 
         <div class="btn-stack">
-          <button class="btn btn-navy" onclick="irAArchivosPersona()">
-            📂 2. Ir a datos / gastos de la persona
-          </button>
-
+          <button class="btn btn-navy" onclick="irAArchivosPersona()">📂 2. Ir a la Planilla de Gastos</button>
           <input type="file" id="input-excel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="subirExcelWeb(this)">
-          <button class="btn btn-outline" onclick="document.getElementById('input-excel').click()">
-            📊 3. Importar Excel (Independiente)
-          </button>
-
-          <button class="btn btn-outline" style="color: var(--accent-red);" onclick="cerrarSesion()">
-            🚪 Cerrar Sesión
-          </button>
+          <button class="btn btn-outline" onclick="document.getElementById('input-excel').click()">📊 Importar Excel Externo</button>
+          <button class="btn btn-outline" style="color: var(--accent-red);" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- PANEL PRINCIPAL -->
+  <!-- PANEL PRINCIPAL (PLANILLA TIPO EXCEL CON CONTROLES) -->
   <div class="main-app" id="vista-panel">
     <header class="header-top">
       <div class="header-user-info">
         <span class="user-badge" id="badge-usuario">Persona</span>
-        <div class="header-title-text">
-          <h1 id="titulo-panel">Gestión de Gastos</h1>
-          <p id="subtitulo-panel">Panel de administración asignado</p>
+        <div>
+          <h1 style="font-size: 1.5rem; color: var(--primary-navy); font-weight: 800;">Planilla Interactiva de Gastos</h1>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Edita directamente sobre las celdas o arrastra las filas para reordenarlas</p>
         </div>
       </div>
-      
-      <div style="display: flex; gap: 1rem;">
-        <button class="btn btn-outline" onclick="volverAInicio()">
-          🏠 Volver al Inicio
-        </button>
-        <button class="btn btn-navy" onclick="abrirModalGasto()">+ Registrar Gasto</button>
-      </div>
+      <button class="btn btn-outline" onclick="volverAInicio()">🏠 Volver al Inicio</button>
     </header>
 
+    <!-- RESUMEN DE BALANCE -->
     <section class="summary-grid">
       <div class="stat-card balance">
-        <div class="stat-header">
-          <span class="stat-title">Balance Disponible</span>
-        </div>
+        <span class="stat-title">Balance Disponible</span>
         <div class="stat-value" id="val-balance">$0,00</div>
       </div>
-
       <div class="stat-card ingresos">
-        <div class="stat-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
           <span class="stat-title">Ingresos Mensuales</span>
-          <button class="edit-btn" onclick="habilitarEdicionIngreso()" title="Editar ingreso">✏️ Modificar</button>
+          <button class="btn btn-outline btn-sm" onclick="modificarIngreso()">✏️ Editar</button>
         </div>
-        <div id="box-ingreso-view">
-          <div class="stat-value" id="val-ingresos" style="color: var(--accent-green);">$0,00</div>
-        </div>
-        <div id="box-ingreso-edit" style="display: none;">
-          <input type="text" id="input-ingreso-val" class="input-ingreso" placeholder="Ej: 1.500.000 o 1500">
-          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; justify-content: flex-end;">
-            <button class="btn btn-navy" style="padding: 0.5rem 1rem; font-size: 0.95rem;" onclick="guardarIngreso()">Guardar</button>
-          </div>
-        </div>
+        <div class="stat-value" id="val-ingresos" style="color: var(--accent-green);">$0,00</div>
       </div>
-
       <div class="stat-card gastos">
-        <div class="stat-header">
-          <span class="stat-title">Gastos del Mes</span>
-        </div>
+        <span class="stat-title">Total Gastos</span>
         <div class="stat-value" id="val-gastos" style="color: var(--accent-red);">$0,00</div>
       </div>
     </section>
 
-    <section class="panel-box">
-      <div class="panel-header-row">
-        <div class="panel-title">Historial de Gastos Registrados</div>
-        <button class="btn btn-navy" style="padding: 0.6rem 1.2rem; font-size: 1rem;" onclick="abrirModalGasto()">+ Añadir Gasto</button>
-      </div>
+    <!-- PANEL SUPERIOR DE CONTROLES Y AGREGADO RÁPIDO -->
+    <section class="top-controls-panel">
+      <div class="controls-title">⚡ Opciones de Registro Rápido</div>
+      <div class="controls-grid">
+        
+        <!-- AGREGAR GASTO -->
+        <form class="add-gasto-form" onsubmit="agregarGastoFila(event)">
+          <div class="field-group">
+            <label>Fecha</label>
+            <input type="date" id="input-fecha" required>
+          </div>
+          <div class="field-group">
+            <label>Categoría</label>
+            <select id="select-categoria" required>
+              <option value="Servicios">Servicios</option>
+              <option value="Alquiler">Alquiler</option>
+              <option value="Comida">Comida</option>
+              <option value="Varios">Varios</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Concepto / Descripción</label>
+            <input type="text" id="input-concepto" placeholder="Ej: Pago de Luz" required autocomplete="off">
+          </div>
+          <div class="field-group">
+            <label>Monto ($)</label>
+            <input type="text" id="input-monto" placeholder="Ej: 15000" required autocomplete="off">
+          </div>
+          <button type="submit" class="btn btn-navy">+ Añadir a Tabla</button>
+        </form>
 
-      <div id="contenedor-gastos">
-        <div class="empty-msg" id="msg-vacio">Aún no has registrado ningún gasto este mes. Haz clic en <strong>"+ Registrar Gasto"</strong> para añadir uno.</div>
-        <table class="gastos-list-table" id="tabla-gastos-historial" style="display: none;">
+        <!-- AGREGAR CATEGORÍA -->
+        <form class="add-cat-form" onsubmit="crearNuevaCategoria(event)">
+          <div class="field-group" style="flex-grow: 1;">
+            <label>Nueva Categoría</label>
+            <input type="text" id="input-nueva-cat" placeholder="Ej: Gimnasio" required autocomplete="off">
+          </div>
+          <button type="submit" class="btn btn-outline">+ Crear</button>
+        </form>
+
+      </div>
+    </section>
+
+    <!-- TABLA TIPO EXCEL -->
+    <section class="excel-container">
+      <div class="table-wrapper">
+        <table class="excel-table">
           <thead>
             <tr>
-              <th>Fecha</th>
+              <th style="width: 40px; text-align: center;">Mover</th>
+              <th style="width: 130px;">Fecha</th>
+              <th style="width: 180px;">Categoría</th>
               <th>Concepto / Descripción</th>
-              <th>Monto</th>
+              <th style="width: 160px; text-align: right;">Monto ($)</th>
+              <th style="width: 50px; text-align: center;">Acción</th>
             </tr>
           </thead>
-          <tbody id="tbody-gastos">
+          <tbody id="tbody-excel">
+            <!-- Filas dinámicas -->
           </tbody>
         </table>
       </div>
     </section>
   </div>
 
+  <!-- VISTA EXCEL STANDALONE -->
   <div id="vista-excel-standalone" class="excel-standalone-view">
-    <div class="excel-header">
-      <div>
-        <strong id="archivo-nombre" style="color: var(--primary-navy); font-size: 1.5rem;">Documento Importado</strong>
-        <p style="font-size: 1rem; color: var(--text-muted);">Vista previa independiente de archivo Excel / CSV</p>
-      </div>
-      <button class="btn btn-outline" style="font-size: 1rem;" onclick="cerrarVistaExcelStandalone()">🏠 Volver al Inicio</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <strong id="archivo-nombre" style="color: var(--primary-navy); font-size: 1.5rem;">Documento Importado</strong>
+      <button class="btn btn-outline" onclick="cerrarVistaExcelStandalone()">🏠 Volver al Inicio</button>
     </div>
-
-    <div class="table-wrapper" id="tabla-wrapper-standalone">
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modal-gasto">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 style="color: var(--primary-navy); font-size: 1.8rem; font-weight: 700;">Nuevo Gasto</h3>
-        <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 1.2rem;" onclick="cerrarModalGasto()">✕</button>
-      </div>
-      <form onsubmit="guardarGasto(event)">
-        <div class="form-group">
-          <label>Concepto / Descripción</label>
-          <input type="text" id="gasto-concepto" class="form-control" placeholder="Ej: Supermercado" required autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label>Monto ($) <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-muted);">(Ej: 1500, 1.500, 1500,50)</span></label>
-          <input type="text" id="gasto-monto" class="form-control" placeholder="0.00" required autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label>Fecha</label>
-          <input type="date" id="gasto-fecha" class="form-control" required>
-        </div>
-        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2.5rem;">
-          <button type="button" class="btn btn-outline" onclick="cerrarModalGasto()">Cancelar</button>
-          <button type="submit" class="btn btn-navy" style="font-size: 1.1rem; padding: 1.1rem 2.2rem;">Guardar Gasto</button>
-        </div>
-      </form>
-    </div>
+    <div id="tabla-wrapper-standalone" class="table-wrapper"></div>
   </div>
 
   <script>
     let modoRegistro = false;
     let usuarioActual = null;
     let nombreUsuarioClave = '';
-    let datosUsuario = { ingresos: 0, gastos: 0, listaGastos: [] };
+    let datosUsuario = { ingresos: 0, categorias: ['Servicios', 'Alquiler', 'Comida', 'Varios'], listaGastos: [] };
 
+    // AUTENTICACIÓN
     function alternarModoAuth() {
       modoRegistro = !modoRegistro;
       document.getElementById('auth-titulo').innerText = modoRegistro ? 'Crear Cuenta' : 'Iniciar Sesión';
@@ -492,19 +435,13 @@ HTML_CONTENT = r"""
       let usuarios = JSON.parse(localStorage.getItem('usuarios_app') || '{}');
 
       if (modoRegistro) {
-        if (usuarios[email]) {
-          alert('El correo ya está registrado.');
-          return;
-        }
+        if (usuarios[email]) return alert('El correo ya está registrado.');
         usuarios[email] = { password: pass };
         localStorage.setItem('usuarios_app', JSON.stringify(usuarios));
-        alert('Cuenta creada exitosamente. Ahora puedes iniciar sesión.');
+        alert('Cuenta creada exitosamente. Inicia sesión ahora.');
         alternarModoAuth();
       } else {
-        if (!usuarios[email] || usuarios[email].password !== pass) {
-          alert('Correo o contraseña incorrectos.');
-          return;
-        }
+        if (!usuarios[email] || usuarios[email].password !== pass) return alert('Correo o contraseña incorrectos.');
         usuarioActual = email;
         localStorage.setItem('sesion_activa', email);
         cargarPanelUsuario();
@@ -523,6 +460,7 @@ HTML_CONTENT = r"""
         usuarioActual = sesionGuardada;
         cargarPanelUsuario();
       }
+      document.getElementById('input-fecha').valueAsDate = new Date();
     });
 
     function cerrarSesion() {
@@ -538,16 +476,8 @@ HTML_CONTENT = r"""
       if (typeof montoStr === 'number') return montoStr;
       if (!montoStr) return 0;
       let str = montoStr.toString().trim();
-      if (str.includes('.') && str.includes(',')) {
-        str = str.replace(/\./g, '').replace(',', '.');
-      } else if (str.includes('.')) {
-        const partes = str.split('.');
-        if (partes.length > 2 || partes[partes.length - 1].length === 3) {
-          str = str.replace(/\./g, '');
-        }
-      } else if (str.includes(',')) {
-        str = str.replace(',', '.');
-      }
+      if (str.includes('.') && str.includes(',')) str = str.replace(/\./g, '').replace(',', '.');
+      else if (str.includes(',')) str = str.replace(',', '.');
       const num = parseFloat(str);
       return isNaN(num) ? 0 : num;
     }
@@ -556,120 +486,215 @@ HTML_CONTENT = r"""
       return '$' + monto.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
+    // CARGAR Y GUARDAR
     function cargarDatosUsuario() {
       try {
         const datosGuardados = localStorage.getItem(obtenerClaveStorage());
-        datosUsuario = datosGuardados ? JSON.parse(datosGuardados) : { ingresos: 0, gastos: 0, listaGastos: [] };
+        if (datosGuardados) {
+          datosUsuario = JSON.parse(datosGuardados);
+          if (!datosUsuario.categorias) datosUsuario.categorias = ['Servicios', 'Alquiler', 'Comida', 'Varios'];
+        } else {
+          datosUsuario = { ingresos: 0, categorias: ['Servicios', 'Alquiler', 'Comida', 'Varios'], listaGastos: [] };
+        }
       } catch (e) {
-        datosUsuario = { ingresos: 0, gastos: 0, listaGastos: [] };
+        datosUsuario = { ingresos: 0, categorias: ['Servicios', 'Alquiler', 'Comida', 'Varios'], listaGastos: [] };
       }
+      actualizarSelectCategorias();
       actualizarPantallaPanel();
     }
 
     function guardarDatosUsuario() {
       if (nombreUsuarioClave && usuarioActual) {
-        try {
-          localStorage.setItem(obtenerClaveStorage(), JSON.stringify(datosUsuario));
-        } catch (e) {}
+        localStorage.setItem(obtenerClaveStorage(), JSON.stringify(datosUsuario));
       }
     }
 
     function irAArchivosPersona() {
       const inputNom = document.getElementById('nombre-usuario').value.trim();
-      if (!inputNom) {
-        alert('Por favor, ingresa el nombre de la persona para continuar.');
-        return;
-      }
+      if (!inputNom) return alert('Ingresa el nombre de la persona para continuar.');
+      
       nombreUsuarioClave = inputNom.toLowerCase();
       document.getElementById('badge-usuario').innerText = inputNom;
-      document.getElementById('titulo-panel').innerText = `Gestión de Gastos`;
-      document.getElementById('subtitulo-panel').innerText = `Control y registro de ingresos/gastos`;
       cargarDatosUsuario();
 
       document.getElementById('vista-inicio').style.display = 'none';
-      document.getElementById('vista-excel-standalone').style.display = 'none';
       document.getElementById('vista-panel').style.display = 'flex';
     }
 
     function volverAInicio() {
       document.getElementById('vista-panel').style.display = 'none';
-      document.getElementById('vista-excel-standalone').style.display = 'none';
       document.getElementById('vista-inicio').style.display = 'flex';
     }
 
+    function actualizarSelectCategorias() {
+      const select = document.getElementById('select-categoria');
+      select.innerHTML = '';
+      datosUsuario.categorias.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.innerText = cat;
+        select.appendChild(option);
+      });
+    }
+
+    function crearNuevaCategoria(e) {
+      e.preventDefault();
+      const input = document.getElementById('input-nueva-cat');
+      const nuevaCat = input.value.trim();
+      if (nuevaCat && !datosUsuario.categorias.includes(nuevaCat)) {
+        datosUsuario.categorias.push(nuevaCat);
+        guardarDatosUsuario();
+        actualizarSelectCategorias();
+        document.getElementById('select-categoria').value = nuevaCat;
+        input.value = '';
+        renderTablaExcel();
+      }
+    }
+
+    function agregarGastoFila(e) {
+      e.preventDefault();
+      const fecha = document.getElementById('input-fecha').value;
+      const categoria = document.getElementById('select-categoria').value;
+      const concepto = document.getElementById('input-concepto').value.trim();
+      const monto = parsearMontoFlexible(document.getElementById('input-monto').value);
+
+      datosUsuario.listaGastos.unshift({ id: Date.now(), fecha, categoria, concepto, monto });
+      guardarDatosUsuario();
+      actualizarPantallaPanel();
+
+      document.getElementById('input-concepto').value = '';
+      document.getElementById('input-monto').value = '';
+    }
+
+    function modificarIngreso() {
+      const nuevoIngreso = prompt('Ingresa el monto del Ingreso Mensual:', datosUsuario.ingresos);
+      if (nuevoIngreso !== null) {
+        datosUsuario.ingresos = parsearMontoFlexible(nuevoIngreso);
+        guardarDatosUsuario();
+        actualizarPantallaPanel();
+      }
+    }
+
+    function eliminarFila(id) {
+      datosUsuario.listaGastos = datosUsuario.listaGastos.filter(item => item.id !== id);
+      guardarDatosUsuario();
+      actualizarPantallaPanel();
+    }
+
     function actualizarPantallaPanel() {
+      let totalGastos = 0;
+      datosUsuario.listaGastos.forEach(g => totalGastos += (parseFloat(g.monto) || 0));
+
       document.getElementById('val-ingresos').innerText = formatearMoneda(datosUsuario.ingresos);
-      document.getElementById('val-gastos').innerText = formatearMoneda(datosUsuario.gastos);
-      const balance = datosUsuario.ingresos - datosUsuario.gastos;
+      document.getElementById('val-gastos').innerText = formatearMoneda(totalGastos);
+
+      const balance = datosUsuario.ingresos - totalGastos;
       const valBalanceElem = document.getElementById('val-balance');
       valBalanceElem.innerText = formatearMoneda(balance);
       valBalanceElem.style.color = balance < 0 ? 'var(--accent-red)' : 'var(--text-main)';
-      actualizarTablaHistorial();
+
+      renderTablaExcel();
     }
 
-    function habilitarEdicionIngreso() {
-      document.getElementById('box-ingreso-view').style.display = 'none';
-      document.getElementById('box-ingreso-edit').style.display = 'block';
-      document.getElementById('input-ingreso-val').value = datosUsuario.ingresos || '';
-    }
+    // RENDER DE TABLA EXCEL + EDICIÓN DIRECTA
+    function renderTablaExcel() {
+      const tbody = document.getElementById('tbody-excel');
+      tbody.innerHTML = '';
 
-    function guardarIngreso() {
-      const inputValRaw = document.getElementById('input-ingreso-val').value;
-      datosUsuario.ingresos = parsearMontoFlexible(inputValRaw);
-      guardarDatosUsuario();
-      actualizarPantallaPanel();
-      document.getElementById('box-ingreso-edit').style.display = 'none';
-      document.getElementById('box-ingreso-view').style.display = 'block';
-    }
-
-    function abrirModalGasto() {
-      document.getElementById('modal-gasto').style.display = 'flex';
-      const fechaInput = document.getElementById('gasto-fecha');
-      if (!fechaInput.value) fechaInput.valueAsDate = new Date();
-    }
-
-    function cerrarModalGasto() {
-      document.getElementById('modal-gasto').style.display = 'none';
-    }
-
-    function guardarGasto(e) {
-      e.preventDefault();
-      const concepto = document.getElementById('gasto-concepto').value;
-      const montoRaw = document.getElementById('gasto-monto').value;
-      const fecha = document.getElementById('gasto-fecha').value;
-      const montoParsed = parsearMontoFlexible(montoRaw);
-
-      datosUsuario.gastos += montoParsed;
-      datosUsuario.listaGastos.unshift({ concepto, monto: montoParsed, fecha });
-      guardarDatosUsuario();
-      actualizarPantallaPanel();
-
-      document.getElementById('gasto-concepto').value = '';
-      document.getElementById('gasto-monto').value = '';
-      cerrarModalGasto();
-    }
-
-    function actualizarTablaHistorial() {
       if (datosUsuario.listaGastos.length === 0) {
-        document.getElementById('msg-vacio').style.display = 'block';
-        document.getElementById('tabla-gastos-historial').style.display = 'none';
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">La planilla está vacía. Agrega items desde el panel superior.</td></tr>`;
         return;
       }
-      document.getElementById('msg-vacio').style.display = 'none';
-      document.getElementById('tabla-gastos-historial').style.display = 'table';
-      const tbody = document.getElementById('tbody-gastos');
-      tbody.innerHTML = '';
-      datosUsuario.listaGastos.forEach(gasto => {
+
+      datosUsuario.listaGastos.forEach((item, index) => {
         const tr = document.createElement('tr');
+        tr.draggable = true;
+        tr.dataset.index = index;
+
+        // Opciones de Select de Categoría dentro de la celda
+        let catOptionsHTML = datosUsuario.categorias.map(c => 
+          `<option value="${c}" ${c === item.categoria ? 'selected' : ''}>${c}</option>`
+        ).join('');
+
         tr.innerHTML = `
-          <td>${gasto.fecha}</td>
-          <td><strong>${gasto.concepto}</strong></td>
-          <td style="color: var(--accent-red); font-weight: 700;">-${formatearMoneda(gasto.monto)}</td>
+          <td class="drag-handle">≡</td>
+          <td>
+            <input type="date" value="${item.fecha}" style="border:none; background:transparent; font-family:inherit;" onchange="actualizarCelda(${item.id}, 'fecha', this.value)">
+          </td>
+          <td>
+            <select style="border:none; background:transparent; font-weight:bold; color: var(--primary-navy);" onchange="actualizarCelda(${item.id}, 'categoria', this.value)">
+              ${catOptionsHTML}
+            </select>
+          </td>
+          <td class="editable-cell" contenteditable="true" onblur="actualizarCelda(${item.id}, 'concepto', this.innerText)">${item.concepto}</td>
+          <td class="editable-cell" contenteditable="true" style="text-align: right; font-weight: 700; color: var(--accent-red);" onblur="actualizarCeldaMonto(${item.id}, this.innerText)">
+            ${formatearMoneda(item.monto)}
+          </td>
+          <td style="text-align: center;">
+            <button class="btn-delete-row" onclick="eliminarFila(${item.id})" title="Eliminar fila">🗑️</button>
+          </td>
         `;
+
+        // Eventos Drag and Drop
+        tr.addEventListener('dragstart', handleDragStart);
+        tr.addEventListener('dragover', handleDragOver);
+        tr.addEventListener('drop', handleDrop);
+        tr.addEventListener('dragend', handleDragEnd);
+
         tbody.appendChild(tr);
       });
     }
 
+    function actualizarCelda(id, campo, valor) {
+      const item = datosUsuario.listaGastos.find(g => g.id === id);
+      if (item) {
+        item[campo] = valor;
+        guardarDatosUsuario();
+      }
+    }
+
+    function actualizarCeldaMonto(id, valorTexto) {
+      const item = datosUsuario.listaGastos.find(g => g.id === id);
+      if (item) {
+        item.monto = parsearMontoFlexible(valorTexto);
+        guardarDatosUsuario();
+        actualizarPantallaPanel();
+      }
+    }
+
+    // LÓGICA DE DRAG & DROP (ARRASTRAR Y MOVER FILAS)
+    let dragSrcIndex = null;
+
+    function handleDragStart(e) {
+      dragSrcIndex = this.dataset.index;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragOver(e) {
+      if (e.preventDefault) e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    function handleDrop(e) {
+      if (e.stopPropagation) e.stopPropagation();
+      const targetIndex = this.dataset.index;
+
+      if (dragSrcIndex !== null && dragSrcIndex !== targetIndex) {
+        const elementoMovido = datosUsuario.listaGastos.splice(dragSrcIndex, 1)[0];
+        datosUsuario.listaGastos.splice(targetIndex, 0, elementoMovido);
+        guardarDatosUsuario();
+        actualizarPantallaPanel();
+      }
+      return false;
+    }
+
+    function handleDragEnd() {
+      this.classList.remove('dragging');
+    }
+
+    // EXCEL EXTERNO
     function subirExcelWeb(input) {
       if (!input.files || !input.files[0]) return;
 
@@ -677,17 +702,11 @@ HTML_CONTENT = r"""
       const formData = new FormData();
       formData.append('file', file);
 
-      fetch('/importar-excel', {
-        method: 'POST',
-        body: formData
-      })
+      fetch('/importar-excel', { method: 'POST', body: formData })
       .then(res => res.json())
       .then(data => {
-        if (data.error) {
-          alert('Error: ' + data.error);
-        } else {
-          mostrarTablaExcelStandalone(data.html, data.filename);
-        }
+        if (data.error) alert('Error: ' + data.error);
+        else mostrarTablaExcelStandalone(data.html, data.filename);
       })
       .catch(err => alert('Error procesando archivo: ' + err));
     }
