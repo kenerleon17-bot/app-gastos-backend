@@ -20,12 +20,14 @@ HTML_CONTENT = r"""
       --bg-card: #FFFFFF;
       --primary-navy: #1E40AF;
       --primary-hover: #1D4ED8;
-      --accent-green: #16A34A;
-      --accent-red: #DC2626;
+      --accent-green: #107C41;
+      --accent-red: #A80000;
+      --excel-green: #217346;
+      --excel-border: #CBD5E1;
+      --excel-bg-head: #F1F5F9;
       --text-main: #0F172A;
       --text-muted: #64748B;
       --border-color: #E2E8F0;
-      --table-border: #CBD5E1;
       --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
@@ -36,13 +38,13 @@ HTML_CONTENT = r"""
       color: var(--text-main);
       font-family: var(--font-family);
       min-height: 100vh;
-      padding: 1.5rem;
+      padding: 1rem;
       line-height: 1.5;
     }
 
     /* AUTENTICACIÓN Y ENTRADA */
     .welcome-wrapper {
-      min-height: calc(100vh - 3rem);
+      min-height: calc(100vh - 2rem);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -70,10 +72,10 @@ HTML_CONTENT = r"""
     .btn-stack { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
 
     .btn {
-      padding: 0.9rem 1.5rem;
-      border-radius: 12px;
+      padding: 0.8rem 1.4rem;
+      border-radius: 8px;
       font-weight: 600;
-      font-size: 1rem;
+      font-size: 0.95rem;
       cursor: pointer;
       border: none;
       display: inline-flex;
@@ -87,113 +89,69 @@ HTML_CONTENT = r"""
     .btn-navy { background-color: var(--primary-navy); color: #ffffff; }
     .btn-navy:hover { background-color: var(--primary-hover); }
 
-    .btn-outline { background-color: #FFFFFF; border: 2px solid var(--border-color); color: var(--text-main); }
+    .btn-excel-green { background-color: var(--excel-green); color: #ffffff; }
+    .btn-excel-green:hover { background-color: #1a5c37; }
+
+    .btn-outline { background-color: #FFFFFF; border: 1px solid var(--excel-border); color: var(--text-main); }
     .btn-outline:hover { background-color: #F8FAFC; border-color: #94A3B8; }
 
-    .btn-sm { padding: 0.5rem 0.9rem; font-size: 0.9rem; border-radius: 8px; }
+    /* PANEL PRINCIPAL (CONTROL MENSUAL) */
+    .main-app { display: none; width: 100%; flex-direction: column; gap: 1rem; max-width: 1500px; margin: 0 auto; }
 
-    /* PANEL PRINCIPAL */
-    .main-app { display: none; width: 100%; flex-direction: column; gap: 1.5rem; max-width: 1400px; margin: 0 auto; }
-
-    .header-top {
-      background-color: var(--bg-card);
+    .top-bar-excel {
+      background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 1rem 1.5rem;
+      border-bottom: 3px solid var(--excel-green);
+      border-radius: 12px;
+      padding: 0.75rem 1.25rem;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
       box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
-    .header-user-info { display: flex; align-items: center; gap: 1rem; }
-    .user-badge { background-color: #EFF6FF; color: var(--primary-navy); padding: 0.4rem 0.8rem; border-radius: 10px; font-weight: 800; font-size: 1.2rem; border: 1px solid #BFDBFE; }
+    .brand-section { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+    .brand-title { font-weight: 800; font-size: 1.25rem; color: var(--excel-green); display: flex; align-items: center; gap: 0.4rem; }
+    .user-pill { font-size: 0.85rem; background: #EFF6FF; color: var(--primary-navy); padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 700; border: 1px solid #BFDBFE; }
 
-    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
-    .stat-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 1.25rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    .stat-card.balance { border-left: 5px solid var(--primary-navy); }
-    .stat-card.ingresos { border-left: 5px solid var(--accent-green); }
-    .stat-card.gastos { border-left: 5px solid var(--accent-red); }
-    .stat-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; }
-    .stat-value { font-size: 2rem; font-weight: 800; margin-top: 0.25rem; }
-
-    /* PANEL SUPERIOR DE OPCIONES DE AGREGAR */
-    .top-controls-panel {
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    .month-picker-container {
       display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-
-    .controls-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--primary-navy);
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 0.5rem;
-    }
-
-    .controls-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 1.5rem;
-    }
-
-    .add-gasto-form {
-      display: grid;
-      grid-template-columns: 1.2fr 1.5fr 2fr 1.2fr auto;
-      gap: 0.75rem;
-      align-items: end;
-    }
-
-    .add-cat-form {
-      display: flex;
+      align-items: center;
       gap: 0.5rem;
-      align-items: end;
-      border-left: 2px solid var(--border-color);
-      padding-left: 1.5rem;
-    }
-
-    .field-group { display: flex; flex-direction: column; gap: 0.3rem; }
-    .field-group label { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); }
-    .field-group input, .field-group select {
-      padding: 0.7rem 0.9rem;
-      border: 1px solid var(--table-border);
+      background: #F1F5F9;
+      border: 1px solid var(--excel-border);
+      padding: 0.3rem 0.75rem;
       border-radius: 8px;
-      font-size: 0.95rem;
-      outline: none;
-      background: #FFFFFF;
     }
-    .field-group input:focus, .field-group select:focus { border-color: var(--primary-navy); }
 
-    /* TABLA INTERACTIVA EXCEL */
+    .top-actions { display: flex; gap: 0.6rem; align-items: center; }
+
+    /* TABLA CONTROL MENSUAL */
     .excel-container {
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 1.5rem;
+      border-radius: 12px;
+      padding: 1rem;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
     }
 
-    .table-wrapper { overflow-x: auto; max-height: 60vh; }
+    .table-wrapper { overflow-x: auto; min-height: 380px; max-height: 60vh; }
 
     .excel-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       background: #FFFFFF;
     }
 
     .excel-table th {
-      background-color: #F1F5F9;
-      color: var(--primary-navy);
+      background-color: var(--excel-bg-head);
+      color: var(--text-main);
       font-weight: 700;
-      padding: 0.8rem 1rem;
-      border: 1px solid var(--table-border);
+      padding: 0.6rem 0.8rem;
+      border: 1px solid var(--excel-border);
       text-align: left;
       position: sticky;
       top: 0;
@@ -201,45 +159,74 @@ HTML_CONTENT = r"""
     }
 
     .excel-table td {
-      padding: 0.7rem 1rem;
-      border: 1px solid var(--table-border);
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--excel-border);
       color: var(--text-main);
       background-color: #FFFFFF;
     }
 
-    .excel-table tr.dragging {
-      opacity: 0.4;
-      background-color: #E2E8F0;
+    .cell-input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
     }
 
-    .excel-table tr:hover td {
-      background-color: #F8FAFC;
-    }
+    .excel-table tr.dragging { opacity: 0.4; background-color: #E2E8F0; }
+    .excel-table tr:hover td { background-color: #F8FAFC; }
 
-    .drag-handle {
-      cursor: grab;
-      text-align: center;
-      color: var(--text-muted);
-      font-weight: bold;
-      user-select: none;
-      width: 40px;
-    }
+    .drag-handle { cursor: grab; text-align: center; color: var(--text-muted); font-weight: bold; user-select: none; width: 35px; }
     .drag-handle:active { cursor: grabbing; }
 
-    .editable-cell { outline: none; }
-    .editable-cell:focus {
-      background-color: #EFF6FF !important;
-      box-shadow: inset 0 0 0 2px var(--primary-navy);
+    .btn-delete-row { background: none; border: none; color: var(--accent-red); cursor: pointer; font-size: 1rem; }
+    .btn-delete-row:hover { opacity: 0.7; }
+
+    /* FOOTER DE TOTALES EN TARJETAS */
+    .summary-footer {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-top: 3px solid var(--excel-green);
+      padding: 1rem 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
-    .btn-delete-row {
-      background: none;
-      border: none;
-      color: var(--accent-red);
-      cursor: pointer;
-      font-size: 1.1rem;
+    .summary-card {
+      background: #F8FAFC;
+      border: 1px solid var(--border-color);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
     }
-    .btn-delete-row:hover { opacity: 0.7; }
+
+    .summary-card.highlight {
+      background: #F0FDF4;
+      border-color: #B7EB8F;
+    }
+
+    .summary-title { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .summary-input {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--accent-green);
+      border: 1px dashed #94A3B8;
+      background: #FFFFFF;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      outline: none;
+      width: 100%;
+    }
+
+    .summary-value { font-size: 1.4rem; font-weight: 800; }
 
     .excel-standalone-view {
       display: none; width: 100%; background-color: var(--bg-card);
@@ -288,7 +275,7 @@ HTML_CONTENT = r"""
         </div>
 
         <div class="btn-stack">
-          <button class="btn btn-navy" onclick="irAArchivosPersona()">📂 2. Ir a la Planilla de Gastos</button>
+          <button class="btn btn-navy" onclick="irAArchivosPersona()">📁 2. Ir a la Planilla de Gastos</button>
           <input type="file" id="input-excel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="subirExcelWeb(this)">
           <button class="btn btn-outline" onclick="document.getElementById('input-excel').click()">📊 Importar Excel Externo</button>
           <button class="btn btn-outline" style="color: var(--accent-red);" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
@@ -297,66 +284,81 @@ HTML_CONTENT = r"""
     </div>
   </div>
 
-<!-- PLANTILLA GASTOS -->
-  <div id="vista-plantilla-gastos" class="hidden" style="height: 100vh; display: flex; flex-direction: column;">
-    <header class="top-bar">
+  <!-- PANEL PRINCIPAL: CONTROL MENSUAL -->
+  <div class="main-app" id="vista-panel">
+    
+    <!-- BARRA SUPERIOR -->
+    <header class="top-bar-excel">
       <div class="brand-section">
         <span class="brand-title">📊 Control Mensual</span>
-        <span id="user-display" style="font-size: 0.8rem; background: #e1dfdd; padding: 0.2rem 0.5rem; border-radius: 12px; font-weight: 600;">Usuario</span>
+        <span class="user-pill" id="badge-usuario">Persona</span>
+        <span class="user-pill" id="badge-email-header">kenerleon17@gmail.com</span>
         
         <div class="month-picker-container">
-          <span class="month-picker-label">📅 Mes:</span>
-          <input type="month" id="selected-month" class="month-picker-input" value="2026-08" onchange="cambiarMes(this.value)">
+          <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">📅 Mes:</span>
+          <input type="month" id="selected-month" class="cell-input" value="2026-08" style="font-weight: 700; cursor: pointer;" onchange="cargarDatosUsuario()">
         </div>
       </div>
 
       <div class="top-actions">
-        <button class="btn btn-outline" onclick="renovarMes()">🔄 Clonar a Siguiente Mes</button>
-        <button class="btn btn-excel" onclick="agregarFila()">+ Nueva Fila</button>
-        <button class="btn btn-outline" onclick="volverAMenu()">⬅️ Menú</button>
+        <button class="btn btn-outline" onclick="clonarSiguienteMes()">🔄 Clonar a Siguiente Mes</button>
+        <button class="btn btn-excel-green" onclick="agregarFilaVacia()">+ Nueva Fila</button>
+        <button class="btn btn-outline" onclick="volverAInicio()">🗙 Menú</button>
       </div>
     </header>
 
-    <main class="sheet-container">
+    <!-- TABLA INTERACTIVA ESTILO CONTROL MENSUAL -->
+    <section class="excel-container">
       <div class="table-wrapper">
-        <table class="excel-table" id="finance-table">
+        <table class="excel-table">
           <thead>
             <tr>
-              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Fecha Venc.</th>
-              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Categoría</th>
-              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Concepto / Detalle</th>
-              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Modo / Cuotas</th>
-              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Fin de Pago</th>
-              <th draggable="true" style="text-align: right;"><span class="col-drag-handle">⋮⋮</span>Monto ($)</th>
-              <th draggable="true" style="text-align: center;"><span class="col-drag-handle">⋮⋮</span>Estado (Fijar)</th>
+              <th style="width: 35px; text-align: center;">::</th>
+              <th style="width: 140px;">:: Fecha Venc.</th>
+              <th style="width: 160px;">:: Categoría</th>
+              <th>:: Concepto / Detalle</th>
+              <th style="width: 140px;">:: Modo / Cuotas</th>
+              <th style="width: 140px;">:: Fin de Pago</th>
+              <th style="width: 150px; text-align: right;">:: Monto ($)</th>
+              <th style="width: 150px; text-align: center;">:: Estado (Fijar)</th>
               <th style="width: 40px; text-align: center;">⚙️</th>
             </tr>
           </thead>
-          <tbody id="table-body">
-            <!-- Carga dinámica -->
+          <tbody id="tbody-excel">
           </tbody>
         </table>
       </div>
+    </section>
 
-      <footer class="summary-footer">
-        <div class="summary-card">
-          <span class="summary-title">💵 Ingresos del Mes</span>
-          <input type="text" id="ingresos-input" class="summary-input" value="350.000,00" oninput="marcarIngresoModificado()">
-        </div>
+    <!-- FOOTER DE RESUMEN FINANCIERO -->
+    <footer class="summary-footer">
+      <div class="summary-card">
+        <span class="summary-title">💵 INGRESOS DEL MES</span>
+        <input type="text" id="ingresos-input" class="summary-input" value="0,00" oninput="guardarIngresoActual()">
+      </div>
 
-        <div class="summary-card">
-          <span class="summary-title">📉 Total Gastos</span>
-          <span id="total-gastos-val" class="summary-value" style="color: var(--accent-red);">$0,00</span>
-        </div>
+      <div class="summary-card">
+        <span class="summary-title">📉 TOTAL GASTOS</span>
+        <span id="total-gastos-val" class="summary-value" style="color: var(--accent-red);">$0,00</span>
+      </div>
 
-        <div class="summary-card highlight" id="ahorro-card">
-          <span class="summary-title">💰 Disponible para Ahorro</span>
-          <span id="total-ahorro-val" class="summary-value" style="color: var(--accent-green);">$0,00</span>
-        </div>
-      </footer>
-    </main>
+      <div class="summary-card highlight">
+        <span class="summary-title">💰 DISPONIBLE PARA AHORRO</span>
+        <span id="total-ahorro-val" class="summary-value" style="color: var(--accent-green);">$0,00</span>
+      </div>
+    </footer>
+
   </div>
-  
+
+  <!-- VISTA EXCEL STANDALONE -->
+  <div id="vista-excel-standalone" class="excel-standalone-view">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <strong id="archivo-nombre" style="color: var(--primary-navy); font-size: 1.5rem;">Documento Importado</strong>
+      <button class="btn btn-outline" onclick="cerrarVistaExcelStandalone()">🏠 Volver al Inicio</button>
+    </div>
+    <div id="tabla-wrapper-standalone" class="table-wrapper"></div>
+  </div>
+
   <script>
     let modoRegistro = false;
     let usuarioActual = null;
@@ -396,6 +398,7 @@ HTML_CONTENT = r"""
       document.getElementById('vista-auth').style.display = 'none';
       document.getElementById('vista-inicio').style.display = 'flex';
       document.getElementById('user-display-email').innerText = usuarioActual;
+      document.getElementById('badge-email-header').innerText = usuarioActual;
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -404,7 +407,10 @@ HTML_CONTENT = r"""
         usuarioActual = sesionGuardada;
         cargarPanelUsuario();
       }
-      document.getElementById('input-fecha').valueAsDate = new Date();
+      
+      const hoy = new Date();
+      const mesStr = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0');
+      document.getElementById('selected-month').value = mesStr;
     });
 
     function cerrarSesion() {
@@ -413,7 +419,8 @@ HTML_CONTENT = r"""
     }
 
     function obtenerClaveStorage() {
-      return 'usuario_gastos_' + usuarioActual + '_' + nombreUsuarioClave;
+      const mes = document.getElementById('selected-month').value || 'general';
+      return 'usuario_gastos_' + usuarioActual + '_' + nombreUsuarioClave + '_' + mes;
     }
 
     function parsearMontoFlexible(montoStr) {
@@ -430,7 +437,7 @@ HTML_CONTENT = r"""
       return '$' + monto.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // CARGA Y GUARDADO DE DATOS
+    // CARGA Y GUARDADO
     function cargarDatosUsuario() {
       try {
         const datosGuardados = localStorage.getItem(obtenerClaveStorage());
@@ -443,7 +450,7 @@ HTML_CONTENT = r"""
       } catch (e) {
         datosUsuario = { ingresos: 0, categorias: ['Servicios', 'Alquiler', 'Comida', 'Varios'], listaGastos: [] };
       }
-      actualizarSelectCategorias();
+      document.getElementById('ingresos-input').value = formatearMoneda(datosUsuario.ingresos || 0).replace('$', '');
       actualizarPantallaPanel();
     }
 
@@ -470,53 +477,27 @@ HTML_CONTENT = r"""
       document.getElementById('vista-inicio').style.display = 'flex';
     }
 
-    function actualizarSelectCategorias() {
-      const select = document.getElementById('select-categoria');
-      select.innerHTML = '';
-      datosUsuario.categorias.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat;
-        option.innerText = cat;
-        select.appendChild(option);
-      });
-    }
-
-    function crearNuevaCategoria(e) {
-      e.preventDefault();
-      const input = document.getElementById('input-nueva-cat');
-      const nuevaCat = input.value.trim();
-      if (nuevaCat && !datosUsuario.categorias.includes(nuevaCat)) {
-        datosUsuario.categorias.push(nuevaCat);
-        guardarDatosUsuario();
-        actualizarSelectCategorias();
-        document.getElementById('select-categoria').value = nuevaCat;
-        input.value = '';
-        renderTablaExcel();
-      }
-    }
-
-    function agregarGastoFila(e) {
-      e.preventDefault();
-      const fecha = document.getElementById('input-fecha').value;
-      const categoria = document.getElementById('select-categoria').value;
-      const concepto = document.getElementById('input-concepto').value.trim();
-      const monto = parsearMontoFlexible(document.getElementById('input-monto').value);
-
-      datosUsuario.listaGastos.unshift({ id: Date.now(), fecha: fecha, categoria: categoria, concepto: concepto, monto: monto });
+    function guardarIngresoActual() {
+      const val = parsearMontoFlexible(document.getElementById('ingresos-input').value);
+      datosUsuario.ingresos = val;
       guardarDatosUsuario();
       actualizarPantallaPanel();
-
-      document.getElementById('input-concepto').value = '';
-      document.getElementById('input-monto').value = '';
     }
 
-    function modificarIngreso() {
-      const nuevoIngreso = prompt('Ingresa el monto del Ingreso Mensual:', datosUsuario.ingresos);
-      if (nuevoIngreso !== null) {
-        datosUsuario.ingresos = parsearMontoFlexible(nuevoIngreso);
-        guardarDatosUsuario();
-        actualizarPantallaPanel();
-      }
+    function agregarFilaVacia() {
+      const hoyStr = new Date().toISOString().split('T')[0];
+      datosUsuario.listaGastos.push({
+        id: Date.now(),
+        fecha: hoyStr,
+        categoria: datosUsuario.categorias[0] || 'Varios',
+        concepto: '',
+        modo: 'Un pago',
+        finPago: 'Este mes',
+        monto: 0,
+        estado: 'pendiente'
+      });
+      guardarDatosUsuario();
+      actualizarPantallaPanel();
     }
 
     function eliminarFila(id) {
@@ -529,24 +510,25 @@ HTML_CONTENT = r"""
       let totalGastos = 0;
       datosUsuario.listaGastos.forEach(g => totalGastos += (parseFloat(g.monto) || 0));
 
-      document.getElementById('val-ingresos').innerText = formatearMoneda(datosUsuario.ingresos);
-      document.getElementById('val-gastos').innerText = formatearMoneda(totalGastos);
+      const ingresos = datosUsuario.ingresos || 0;
+      const ahorro = ingresos - totalGastos;
 
-      const balance = datosUsuario.ingresos - totalGastos;
-      const valBalanceElem = document.getElementById('val-balance');
-      valBalanceElem.innerText = formatearMoneda(balance);
-      valBalanceElem.style.color = balance < 0 ? 'var(--accent-red)' : 'var(--text-main)';
+      document.getElementById('total-gastos-val').innerText = formatearMoneda(totalGastos);
+      
+      const ahorroElem = document.getElementById('total-ahorro-val');
+      ahorroElem.innerText = formatearMoneda(ahorro);
+      ahorroElem.style.color = ahorro < 0 ? 'var(--accent-red)' : 'var(--accent-green)';
 
       renderTablaExcel();
     }
 
-    // RENDERIZADO Y EDICIÓN DE TABLA
+    // RENDERIZADO DE TABLA ESTILO CONTROL MENSUAL
     function renderTablaExcel() {
       const tbody = document.getElementById('tbody-excel');
       tbody.innerHTML = '';
 
       if (datosUsuario.listaGastos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">La planilla está vacía. Agrega items desde el panel superior.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">La planilla está vacía. Haz clic en "+ Nueva Fila" para agregar gastos.</td></tr>';
         return;
       }
 
@@ -562,16 +544,30 @@ HTML_CONTENT = r"""
         tr.innerHTML = `
           <td class="drag-handle">≡</td>
           <td>
-            <input type="date" value="${item.fecha}" style="border:none; background:transparent; font-family:inherit;" onchange="actualizarCelda(${item.id}, 'fecha', this.value)">
+            <input type="date" class="cell-input" value="${item.fecha || ''}" onchange="actualizarCelda(${item.id}, 'fecha', this.value)">
           </td>
           <td>
-            <select style="border:none; background:transparent; font-weight:bold; color: var(--primary-navy);" onchange="actualizarCelda(${item.id}, 'categoria', this.value)">
+            <select class="cell-input" style="font-weight:bold; color: var(--primary-navy);" onchange="actualizarCelda(${item.id}, 'categoria', this.value)">
               ${catOptionsHTML}
             </select>
           </td>
-          <td class="editable-cell" contenteditable="true" onblur="actualizarCelda(${item.id}, 'concepto', this.innerText)">${item.concepto}</td>
-          <td class="editable-cell" contenteditable="true" style="text-align: right; font-weight: 700; color: var(--accent-red);" onblur="actualizarCeldaMonto(${item.id}, this.innerText)">
-            ${formatearMoneda(item.monto)}
+          <td>
+            <input type="text" class="cell-input" placeholder="Detalle..." value="${item.concepto || ''}" onchange="actualizarCelda(${item.id}, 'concepto', this.value)">
+          </td>
+          <td>
+            <input type="text" class="cell-input" style="text-align: center;" value="${item.modo || 'Un pago'}" onchange="actualizarCelda(${item.id}, 'modo', this.value)">
+          </td>
+          <td>
+            <input type="text" class="cell-input" style="text-align: center;" value="${item.finPago || 'Este mes'}" onchange="actualizarCelda(${item.id}, 'finPago', this.value)">
+          </td>
+          <td>
+            <input type="text" class="cell-input" style="text-align: right; font-weight: 700; color: var(--accent-red);" value="${formatearMoneda(item.monto || 0).replace('$', '')}" onchange="actualizarCeldaMonto(${item.id}, this.value)">
+          </td>
+          <td style="text-align: center;">
+            <select class="cell-input" style="text-align-last: center; font-weight: 700;" onchange="actualizarCelda(${item.id}, 'estado', this.value)">
+              <option value="pendiente" ${item.estado === 'pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
+              <option value="pagado" ${item.estado === 'pagado' ? 'selected' : ''}>✅ Pagado</option>
+            </select>
           </td>
           <td style="text-align: center;">
             <button class="btn-delete-row" onclick="eliminarFila(${item.id})" title="Eliminar fila">🗑️</button>
@@ -603,6 +599,31 @@ HTML_CONTENT = r"""
         guardarDatosUsuario();
         actualizarPantallaPanel();
       }
+    }
+
+    function clonarSiguienteMes() {
+      const picker = document.getElementById('selected-month');
+      if (!picker.value) return;
+
+      const [year, month] = picker.value.split('-').map(Number);
+      let nextYear = year;
+      let nextMonth = month + 1;
+      if (nextMonth > 12) {
+        nextMonth = 1;
+        nextYear++;
+      }
+
+      const nextMonthStr = nextYear + '-' + String(nextMonth).padStart(2, '0');
+      const claveSiguiente = 'usuario_gastos_' + usuarioActual + '_' + nombreUsuarioClave + '_' + nextMonthStr;
+
+      if (localStorage.getItem(claveSiguiente)) {
+        if (!confirm(`El mes ${nextMonthStr} ya tiene datos registrados. ¿Quieres sobrescribirlo?`)) return;
+      }
+
+      localStorage.setItem(claveSiguiente, JSON.stringify(datosUsuario));
+      picker.value = nextMonthStr;
+      cargarDatosUsuario();
+      alert(`¡Planilla clonada exitosamente al mes ${nextMonthStr}!`);
     }
 
     // ARRASTRAR Y MOVER FILAS (DRAG & DROP)
