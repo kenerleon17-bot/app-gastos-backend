@@ -874,8 +874,8 @@ def importar_excel():
         return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
 
     try:
-        if file.filename.endswith('.csv'):
-            df = pd.read_csv(file)
+        if file.filename.endswith('.csv'): # type: ignore
+            df = pd.read_csv(file) # type: ignore
         else:
             df = pd.read_excel(file)
 
