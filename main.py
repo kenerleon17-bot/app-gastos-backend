@@ -439,7 +439,7 @@ HTML_CONTENT = r"""
   <script>
     // CREDENCIALES DE SUPABASE
     const SUPABASE_URL = "https://kcjacyxeunhrupufdwbm.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_-kKQxsI0sf0sdj9u0hmyQ_hyba_--";
+    const SUPABASE_KEY = "sb_publishable_-kKQxsIOsfOsdj9uO0hmyQ_hyba_RzL";
 
     // INICIALIZACIÓN SEGURA DE SUPABASE CLIENT
     if (!window.supabaseClient) {
