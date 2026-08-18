@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from flask import Flask, render_template_string, request, jsonify
+from flask import Flask, jsonify, render_template_string, request
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
@@ -875,42 +875,56 @@ HTML_CONTENT = r"""
     window.cerrarVistaExcelStandalone = function() {
       document.getElementById('vista-excel-standalone').style.display = 'none';
       document.getElementById('vista-inicio').style.display = 'flex';
-    }
+      cargarPanelUsuario();
+    };
   </script>
 </body>
 </html>
 """
 
+
 @app.route('/')
 def index():
-    return render_template_string(HTML_CONTENT)
+  return render_template_string(HTML_CONTENT)
+
 
 @app.route('/importar-excel', methods=['POST'])
 def importar_excel():
-    try:
-        if 'file' not in request.files:
-            return jsonify({'error': 'No file part'}), 400
-        
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({'error': 'No selected file'}), 400
+  try:
+    if 'file' not in request.files:
+      return jsonify({'error': 'No se encontró ningún archivo'}), 400
 
-        # Leer archivo usando Pandas
-        if file.filename.endswith('.csv'):
-            df = pd.read_csv(file)
-        else:
-            df = pd.read_excel(file)
+    file = request.files['file']
+    nombre_destino = request.form.get('nombre_destino')
+    user_id = request.form.get('user_id')
+    mes = request.form.get('mes', '2026-08')
 
-        # Generar representación HTML de la tabla para visualizarla
-        html_table = df.to_html(classes='excel-table', index=False)
+    if file.filename == '':
+      return jsonify({'error': 'Archivo sin seleccionar'}), 400
 
-        return jsonify({
-            'message': 'Archivo procesado correctamente con Pandas',
-            'filename': file.filename,
-            'html': html_table
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    # Lectura del archivo usando pandas
+    if file.filename.endswith('.csv'):
+      df = pd.read_csv(file)
+    else:
+      df = pd.read_excel(file)
+
+    # Convertir el DataFrame a tabla HTML para mostrar la vista previa en el navegador
+    html_tabla = df.to_html(
+        classes='excel-table', index=False, border=0, na_rep=''
+    )
+
+    return jsonify({
+        'message': (
+            f'Archivo {file.filename} importado con éxito para el perfil'
+            f' {nombre_destino}'
+        ),
+        'filename': file.filename,
+        'html': html_tabla,
+    })
+
+  except Exception as e:
+    return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+  app.run(debug=True, port=5000)
