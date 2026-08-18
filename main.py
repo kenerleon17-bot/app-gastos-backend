@@ -53,7 +53,7 @@ HTML_CONTENT = r"""
 
     .welcome-container {
       width: 100%;
-      max-width: 450px;
+      max-width: 480px;
       background: #ffffff;
       border: 1px solid var(--excel-border);
       border-radius: 8px;
@@ -64,7 +64,7 @@ HTML_CONTENT = r"""
     }
 
     .welcome-title { font-size: 1.8rem; color: var(--excel-header); font-weight: 700; margin-bottom: 0.5rem; }
-    .welcome-subtitle { color: #605e5c; font-size: 0.95rem; margin-bottom: 2rem; }
+    .welcome-subtitle { color: #605e5c; font-size: 0.95rem; margin-bottom: 1.5rem; }
 
     .form-user { display: flex; flex-direction: column; gap: 1.2rem; text-align: left; }
     .form-user label { font-weight: 600; font-size: 0.9rem; color: var(--text-main); }
@@ -96,6 +96,41 @@ HTML_CONTENT = r"""
 
     .btn-outline { background: white; border-color: #8a8886; color: var(--text-main); }
     .btn-outline:hover { background: #f3f2f1; }
+
+    /* CONTENEDOR DE PERFILES RÁPIDOS */
+    .profiles-section {
+      margin-top: 0.5rem;
+      border-top: 1px dashed var(--excel-border);
+      padding-top: 1.2rem;
+      text-align: left;
+    }
+    .profiles-label { font-size: 0.85rem; font-weight: 700; color: #605e5c; margin-bottom: 0.6rem; display: block; }
+    .profiles-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+    .profile-pill-btn {
+      background: #f3f2f1;
+      border: 1px solid #c8c6c4;
+      border-radius: 20px;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary-navy);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.2s;
+    }
+    .profile-pill-btn:hover {
+      background: #eff6ff;
+      border-color: var(--primary-navy);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
 
     /* BARRA SUPERIOR COMPACTA */
     .top-bar {
@@ -351,7 +386,7 @@ HTML_CONTENT = r"""
         <div>
           <label for="nombre-destino-excel">Destino para importar Excel (Mover a...):</label>
           <select id="nombre-destino-excel">
-              <!-- Vacío si no hay perfiles creados -->
+              <!-- Se llena dinámicamente -->
           </select>
         </div>
 
@@ -360,6 +395,14 @@ HTML_CONTENT = r"""
           <input type="file" id="input-excel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="window.subirExcelWeb(this)">
           <button class="btn btn-outline" onclick="document.getElementById('input-excel').click()">📊 Importar Excel Inteligente</button>
           <button class="btn btn-outline" style="color: var(--accent-red);" onclick="window.cerrarSesion()">🚪 Cerrar Sesión</button>
+        </div>
+      </div>
+
+      <!-- BOTONES DE ACCESO DIRECTO A PERFILES EXISTENTES -->
+      <div class="profiles-section" id="seccion-perfiles-rapidos" style="display: none;">
+        <span class="profiles-label">⚡ Perfiles guardados (Click para abrir):</span>
+        <div class="profiles-grid" id="contenedor-perfiles-grid">
+          <!-- Botones dinámicos de perfiles -->
         </div>
       </div>
     </div>
@@ -494,6 +537,9 @@ HTML_CONTENT = r"""
       const selectDestino = document.getElementById('nombre-destino-excel');
       selectDestino.innerHTML = ''; 
 
+      const contenedorGrid = document.getElementById('contenedor-perfiles-grid');
+      contenedorGrid.innerHTML = '';
+
       const { data, error } = await supabase
         .from('control_gastos')
         .select('nombre_persona')
@@ -503,11 +549,27 @@ HTML_CONTENT = r"""
         const perfilesUnicos = [...new Set(data.map(item => item.nombre_persona))];
         
         perfilesUnicos.forEach(perfil => {
+          // Llenar select
           const opt = document.createElement('option');
           opt.value = perfil;
           opt.textContent = perfil.charAt(0).toUpperCase() + perfil.slice(1);
           selectDestino.appendChild(opt);
+
+          // Crear botón pastilla interactivo (Autodirige al hacer clic)
+          const btnPerfil = document.createElement('button');
+          btnPerfil.type = 'button';
+          btnPerfil.className = 'profile-pill-btn';
+          btnPerfil.innerHTML = `👤 ${perfil.charAt(0).toUpperCase() + perfil.slice(1)}`;
+          btnPerfil.onclick = function() {
+            document.getElementById('nombre-usuario').value = perfil;
+            window.irAArchivosPersona();
+          };
+          contenedorGrid.appendChild(btnPerfil);
         });
+
+        document.getElementById('seccion-perfiles-rapidos').style.display = 'block';
+      } else {
+        document.getElementById('seccion-perfiles-rapidos').style.display = 'none';
       }
     }
 
@@ -624,7 +686,7 @@ HTML_CONTENT = r"""
 
     window.irAArchivosPersona = function() {
       const inputNom = document.getElementById('nombre-usuario').value.trim();
-      if (!inputNom) return alert('Ingresa el nombre de la persona para continuar.');
+      if (!inputNom) return alert('Ingresa o selecciona el nombre de la persona para continuar.');
 
       nombrePersona = inputNom.toLowerCase().replace(/\s+/g, '_');
       document.getElementById('user-display').innerText = inputNom;
@@ -902,13 +964,11 @@ def importar_excel():
     if file.filename == '':
       return jsonify({'error': 'Archivo sin seleccionar'}), 400
 
-    # Lectura del archivo usando pandas
     if file.filename.endswith('.csv'):
       df = pd.read_csv(file)
     else:
       df = pd.read_excel(file)
 
-    # Convertir el DataFrame a tabla HTML para mostrar la vista previa en el navegador
     html_tabla = df.to_html(
         classes='excel-table', index=False, border=0, na_rep=''
     )
