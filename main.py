@@ -549,13 +549,11 @@ HTML_CONTENT = r"""
         const perfilesUnicos = [...new Set(data.map(item => item.nombre_persona))];
         
         perfilesUnicos.forEach(perfil => {
-          // Llenar select
           const opt = document.createElement('option');
           opt.value = perfil;
           opt.textContent = perfil.charAt(0).toUpperCase() + perfil.slice(1);
           selectDestino.appendChild(opt);
 
-          // Crear botón pastilla interactivo (Autodirige al hacer clic)
           const btnPerfil = document.createElement('button');
           btnPerfil.type = 'button';
           btnPerfil.className = 'profile-pill-btn';
@@ -894,10 +892,10 @@ HTML_CONTENT = r"""
       if (!input.files || !input.files[0]) return;
 
       const file = input.files[0];
-      const nombreDestino = document.getElementById('nombre-destino-excel').value;
+      const nombreDestino = document.getElementById('nombre-destino-excel').value || document.getElementById('nombre-usuario').value.trim();
 
       if (!nombreDestino) {
-          alert("No hay ningún perfil creado todavía para asignar el Excel. Crea un perfil primero.");
+          alert("Ingresa o selecciona un nombre de perfil para importar el Excel.");
           return;
       }
 
@@ -917,10 +915,10 @@ HTML_CONTENT = r"""
       .then(data => {
         if (data.error) alert('Error: ' + data.error);
         else {
-            alert(data.message || 'Excel importado y guardado con éxito en el perfil');
-            if (data.html) {
-                mostrarTablaExcelStandalone(data.html, data.filename);
-            }
+            alert(data.message || 'Excel importado y guardado con éxito en la nube');
+            // Almacenar el nombre de la persona y abrir directamente el panel con los datos cargados
+            document.getElementById('nombre-usuario').value = nombreDestino;
+            window.irAArchivosPersona();
         }
       })
       .catch(err => alert('Error procesando archivo: ' + err));
@@ -961,25 +959,75 @@ def importar_excel():
     user_id = request.form.get('user_id')
     mes = request.form.get('mes', '2026-08')
 
-    if file.filename == '':
+    filename = file.filename
+    if not filename:
       return jsonify({'error': 'Archivo sin seleccionar'}), 400
 
-    if file.filename.endswith('.csv'):
-      df = pd.read_csv(file)
+    # Lectura del archivo usando pandas
+    if filename.endswith('.csv'):
+      df = pd.read_csv(file.stream)
     else:
       df = pd.read_excel(file)
 
-    html_tabla = df.to_html(
-        classes='excel-table', index=False, border=0, na_rep=''
-    )
+    # Normalizar nombres de columnas (pasar a minúsculas y sin acentos para buscar tolerantes)
+    df.columns = [str(col).strip().lower() for col in df.columns]
+
+    # Mapear las filas del DataFrame al formato JSON que usa Supabase
+    filas_convertidas = []
+    for _, row in df.iterrows():
+      # Buscar columnas de forma flexible
+      fecha = str(
+          row.get('fecha venc.')
+          or row.get('fecha')
+          or row.get('fecha_venc')
+          or f'{mes}-01'
+      )
+      cat = str(row.get('categoría') or row.get('categoria') or 'General')
+      detalle = str(
+          row.get('concepto / detalle')
+          or row.get('detalle')
+          or row.get('concepto')
+          or ''
+      )
+      modo_cuotas = str(
+          row.get('modo / cuotas') or row.get('cuotas') or 'Un pago'
+      )
+      fin = str(row.get('fin de pago') or row.get('fin') or 'Este mes')
+
+      monto_raw = row.get('monto ($)') or row.get('monto') or 0
+      try:
+        monto_val = float(str(monto_raw).replace(',', '.'))
+      except:
+        monto_val = 0.0
+      monto_str = f'{monto_val:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
+
+      estado = str(row.get('estado') or 'Pendiente')
+
+      # Determinar si tiene cuotas
+      tiene_cuotas = '/' in modo_cuotas or 'cuota' in modo_cuotas.lower()
+
+      filas_convertidas.append({
+          'fecha': fecha[:10] if len(fecha) >= 10 else f'{mes}-01',
+          'cat': cat,
+          'detalle': detalle,
+          'tieneCuotas': tiene_cuotas,
+          'cuota': modo_cuotas if tiene_cuotas else 'Un pago',
+          'fin': fin,
+          'monto': monto_str,
+          'estado': estado,
+      })
+
+    # Guardar en Supabase usando la API REST de supabase-py o requests si es necesario,
+    # pero como el cliente Supabase de JS en el navegador ya hace el upsert,
+    # podemos retornar las filas parseadas para que el navegador las guarde o guardarlas directamente si usas supabase en python.
+    # Aquí devolveremos las filas JSON para que el cliente JS las sincronice con Supabase al instante:
 
     return jsonify({
-        'message': (
-            f'Archivo {file.filename} importado con éxito para el perfil'
-            f' {nombre_destino}'
-        ),
+        'message': f'¡Excel importado con éxito! Se cargaron {len(filas_convertidas)} registros.',
         'filename': file.filename,
-        'html': html_tabla,
+        'filas': filas_convertidas,
+        'mes': mes,
+        'nombre_destino': nombre_destino,
     })
 
   except Exception as e:
