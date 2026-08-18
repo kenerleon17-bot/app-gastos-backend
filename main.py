@@ -316,7 +316,7 @@ HTML_CONTENT = r"""
       <h1 class="welcome-title" id="auth-titulo">Iniciar Sesión</h1>
       <p class="welcome-subtitle" id="auth-subtitulo">Ingresa tus datos para conectarte en la nube</p>
 
-      <form class="form-user" onsubmit="procesarAuth(event)">
+      <form class="form-user" onsubmit="window.procesarAuth(event)">
         <div>
           <label for="auth-email">Correo Electrónico</label>
           <input type="email" id="auth-email" placeholder="usuario@ejemplo.com" required autocomplete="off">
@@ -328,7 +328,7 @@ HTML_CONTENT = r"""
 
         <div class="btn-stack">
           <button type="submit" class="btn btn-navy" id="auth-btn-submit">Entrar</button>
-          <button type="button" class="btn btn-outline" onclick="alternarModoAuth()">
+          <button type="button" class="btn btn-outline" onclick="window.alternarModoAuth()">
             <span id="auth-toggle-msg">¿No tienes cuenta? Regístrate aquí</span>
           </button>
         </div>
@@ -349,10 +349,10 @@ HTML_CONTENT = r"""
         </div>
 
         <div class="btn-stack">
-          <button class="btn btn-excel" onclick="irAArchivosPersona()">📁 2. Ir a la Plantilla de Gastos</button>
-          <input type="file" id="input-excel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="subirExcelWeb(this)">
+          <button class="btn btn-excel" onclick="window.irAArchivosPersona()">📁 2. Ir a la Plantilla de Gastos</button>
+          <input type="file" id="input-excel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="window.subirExcelWeb(this)">
           <button class="btn btn-outline" onclick="document.getElementById('input-excel').click()">📊 Importar Excel Externo</button>
-          <button class="btn btn-outline" style="color: var(--accent-red);" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+          <button class="btn btn-outline" style="color: var(--accent-red);" onclick="window.cerrarSesion()">🚪 Cerrar Sesión</button>
         </div>
       </div>
     </div>
@@ -376,14 +376,14 @@ HTML_CONTENT = r"""
 
         <div class="month-picker-container">
           <span class="month-picker-label">📅 Mes:</span>
-          <input type="month" id="selected-month" class="month-picker-input" value="2026-08" onchange="cargarDatosUsuario()">
+          <input type="month" id="selected-month" class="month-picker-input" value="2026-08" onchange="window.cargarDatosUsuario()">
         </div>
       </div>
 
       <div class="top-actions">
-        <button class="btn btn-outline" onclick="renovarMes()">🔄 Clonar Mes a Siguiente</button>
-        <button class="btn btn-excel" onclick="agregarFila()">+ Nueva Fila</button>
-        <button class="btn btn-outline" onclick="volverAInicio()">🗙 Menú</button>
+        <button class="btn btn-outline" onclick="window.renovarMes()">🔄 Clonar Mes a Siguiente</button>
+        <button class="btn btn-excel" onclick="window.agregarFila()">+ Nueva Fila</button>
+        <button class="btn btn-outline" onclick="window.volverAInicio()">🗙 Menú</button>
       </div>
     </header>
 
@@ -411,7 +411,7 @@ HTML_CONTENT = r"""
       <footer class="summary-footer">
         <div class="summary-card">
           <span class="summary-title">💵 Ingresos del Mes</span>
-          <input type="text" id="ingresos-input" class="summary-input" value="0,00" oninput="marcarIngresoModificado()">
+          <input type="text" id="ingresos-input" class="summary-input" value="0,00" oninput="window.marcarIngresoModificado()">
         </div>
 
         <div class="summary-card">
@@ -431,25 +431,28 @@ HTML_CONTENT = r"""
   <div id="vista-excel-standalone" class="excel-standalone-view">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
       <strong id="archivo-nombre" style="color: var(--primary-navy); font-size: 1.5rem;">Documento Importado</strong>
-      <button class="btn btn-outline" onclick="cerrarVistaExcelStandalone()">🏠 Volver al Inicio</button>
+      <button class="btn btn-outline" onclick="window.cerrarVistaExcelStandalone()">🏠 Volver al Inicio</button>
     </div>
     <div id="tabla-wrapper-standalone" class="table-wrapper"></div>
   </div>
 
   <script>
-    // ===== CREDENCIALES DE SUPABASE =====
+    // CREDENCIALES DE SUPABASE
     const SUPABASE_URL = "https://kcjacyxeunhrupufdwbm.supabase.co";
     const SUPABASE_KEY = "sb_publishable_-kKQxsI0sf0sdj9u0hmyQ_hyba_--";
-    // ===============================================
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // INICIALIZACIÓN SEGURA DE SUPABASE CLIENT
+    if (!window.supabaseClient) {
+      window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
+    var supabase = window.supabaseClient;
 
     let modoRegistro = false;
     let usuarioSesion = null;
     let nombrePersona = '';
     let datosUsuario = { ingresos: "0,00", filas: [] };
 
-    // EXPOSICIÓN GLOBAL DE FUNCIONES PRINCIPALES
+    // DEFINICIÓN DE FUNCIONES EN EL ÁMBITO GLOBAL
     window.alternarModoAuth = function() {
       modoRegistro = !modoRegistro;
       document.getElementById('auth-titulo').innerText = modoRegistro ? 'Crear Cuenta' : 'Iniciar Sesión';
@@ -483,18 +486,6 @@ HTML_CONTENT = r"""
       document.getElementById('badge-email-header').innerText = usuarioSesion.email;
     }
 
-    window.addEventListener('DOMContentLoaded', async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        usuarioSesion = session.user;
-        cargarPanelUsuario();
-      }
-
-      const hoy = new Date();
-      const mesStr = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0');
-      document.getElementById('selected-month').value = mesStr;
-    });
-
     window.cerrarSesion = async function() {
       await supabase.auth.signOut();
       location.reload();
@@ -511,7 +502,7 @@ HTML_CONTENT = r"""
       return num.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // CARGA Y GUARDADO EN LA NUBE (SUPABASE)
+    // CARGA Y GUARDADO EN LA NUBE
     window.cargarDatosUsuario = async function() {
       const mes = document.getElementById('selected-month').value;
       const tbody = document.getElementById('table-body');
@@ -544,22 +535,22 @@ HTML_CONTENT = r"""
           const row = document.createElement('tr');
           const isDisabled = !item.tieneCuotas;
           row.innerHTML = `
-            <td><input type="date" class="cell-input input-fecha" value="${item.fecha || ''}" onchange="guardarDatosUsuario()"></td>
-            <td><input type="text" class="cell-input input-cat" list="categorias-list" value="${item.cat || ''}" onchange="guardarDatosUsuario()"></td>
-            <td><input type="text" class="cell-input input-detalle" value="${item.detalle || ''}" onchange="guardarDatosUsuario()"></td>
+            <td><input type="date" class="cell-input input-fecha" value="${item.fecha || ''}" onchange="window.guardarDatosUsuario()"></td>
+            <td><input type="text" class="cell-input input-cat" list="categorias-list" value="${item.cat || ''}" onchange="window.guardarDatosUsuario()"></td>
+            <td><input type="text" class="cell-input input-detalle" value="${item.detalle || ''}" onchange="window.guardarDatosUsuario()"></td>
             <td>
               <div class="cuota-container">
-                <select class="select-cuotas-type" onchange="toggleModoCuotas(this)">
+                <select class="select-cuotas-type" onchange="window.toggleModoCuotas(this)">
                   <option value="sin" ${!item.tieneCuotas ? 'selected' : ''}>Un pago</option>
                   <option value="con" ${item.tieneCuotas ? 'selected' : ''}>En cuotas</option>
                 </select>
-                <input type="text" class="cell-input input-cuota-val" value="${item.cuota || 'Un pago'}" style="text-align: center;" ${isDisabled ? 'disabled' : ''} onchange="guardarDatosUsuario()">
+                <input type="text" class="cell-input input-cuota-val" value="${item.cuota || 'Un pago'}" style="text-align: center;" ${isDisabled ? 'disabled' : ''} onchange="window.guardarDatosUsuario()">
               </div>
             </td>
-            <td><input type="text" class="cell-input input-fin-val" value="${item.fin || 'Este mes'}" style="text-align: center;" ${isDisabled ? 'disabled' : ''} onchange="guardarDatosUsuario()"></td>
-            <td><input type="text" class="cell-input input-monto" value="${item.monto || '0,00'}" style="text-align: right; font-weight: 600;" oninput="calcularTotales()" onchange="guardarDatosUsuario()"></td>
+            <td><input type="text" class="cell-input input-fin-val" value="${item.fin || 'Este mes'}" style="text-align: center;" ${isDisabled ? 'disabled' : ''} onchange="window.guardarDatosUsuario()"></td>
+            <td><input type="text" class="cell-input input-monto" value="${item.monto || '0,00'}" style="text-align: right; font-weight: 600;" oninput="window.calcularTotales()" onchange="window.guardarDatosUsuario()"></td>
             <td style="text-align: center;">${crearSelectEstado(item.estado || 'Pendiente')}</td>
-            <td style="text-align: center;"><button onclick="borrarFila(this)" style="border:none; background:none; cursor:pointer;">❌</button></td>
+            <td style="text-align: center;"><button onclick="window.borrarFila(this)" style="border:none; background:none; cursor:pointer;">❌</button></td>
           `;
           tbody.appendChild(row);
         });
@@ -646,7 +637,7 @@ HTML_CONTENT = r"""
     function crearSelectEstado(estadoActual) {
       const claseColor = getClaseEstado(estadoActual);
       return `
-        <select class="select-status ${claseColor}" onchange="cambiarColorEstado(this)">
+        <select class="select-status ${claseColor}" onchange="window.cambiarColorEstado(this)">
           <option value="Pendiente" ${estadoActual === 'Pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
           <option value="Pagado" ${estadoActual === 'Pagado' ? 'selected' : ''}>✅ Pagado / Al día</option>
           <option value="Vencido" ${estadoActual === 'Vencido' ? 'selected' : ''}>🚨 Vencido</option>
@@ -708,22 +699,22 @@ HTML_CONTENT = r"""
       const mesActual = document.getElementById('selected-month').value || "2026-08";
 
       newRow.innerHTML = `
-        <td><input type="date" class="cell-input input-fecha" value="${mesActual}-01" onchange="guardarDatosUsuario()"></td>
-        <td><input type="text" class="cell-input input-cat" list="categorias-list" placeholder="Categoría..." onchange="guardarDatosUsuario()"></td>
-        <td><input type="text" class="cell-input input-detalle" placeholder="Nuevo gasto..." onchange="guardarDatosUsuario()"></td>
+        <td><input type="date" class="cell-input input-fecha" value="${mesActual}-01" onchange="window.guardarDatosUsuario()"></td>
+        <td><input type="text" class="cell-input input-cat" list="categorias-list" placeholder="Categoría..." onchange="window.guardarDatosUsuario()"></td>
+        <td><input type="text" class="cell-input input-detalle" placeholder="Nuevo gasto..." onchange="window.guardarDatosUsuario()"></td>
         <td>
           <div class="cuota-container">
-            <select class="select-cuotas-type" onchange="toggleModoCuotas(this)">
+            <select class="select-cuotas-type" onchange="window.toggleModoCuotas(this)">
               <option value="sin" selected>Un pago</option>
               <option value="con">En cuotas</option>
             </select>
-            <input type="text" class="cell-input input-cuota-val" value="Un pago" style="text-align: center;" disabled onchange="guardarDatosUsuario()">
+            <input type="text" class="cell-input input-cuota-val" value="Un pago" style="text-align: center;" disabled onchange="window.guardarDatosUsuario()">
           </div>
         </td>
-        <td><input type="text" class="cell-input input-fin-val" value="Este mes" style="text-align: center;" disabled onchange="guardarDatosUsuario()"></td>
-        <td><input type="text" class="cell-input input-monto" value="0,00" style="text-align: right; font-weight: 600;" oninput="calcularTotales()" onchange="guardarDatosUsuario()"></td>
+        <td><input type="text" class="cell-input input-fin-val" value="Este mes" style="text-align: center;" disabled onchange="window.guardarDatosUsuario()"></td>
+        <td><input type="text" class="cell-input input-monto" value="0,00" style="text-align: right; font-weight: 600;" oninput="window.calcularTotales()" onchange="window.guardarDatosUsuario()"></td>
         <td style="text-align: center;">${crearSelectEstado('Pendiente')}</td>
-        <td style="text-align: center;"><button onclick="borrarFila(this)" style="border:none; background:none; cursor:pointer;">❌</button></td>
+        <td style="text-align: center;"><button onclick="window.borrarFila(this)" style="border:none; background:none; cursor:pointer;">❌</button></td>
       `;
       tbody.appendChild(newRow);
       window.calcularTotales();
@@ -812,7 +803,6 @@ HTML_CONTENT = r"""
       }
     };
 
-    // ARCHIVOS EXCEL EXTERNOS
     window.subirExcelWeb = function(input) {
       if (!input.files || !input.files[0]) return;
 
@@ -841,6 +831,19 @@ HTML_CONTENT = r"""
       document.getElementById('vista-excel-standalone').style.display = 'none';
       document.getElementById('vista-inicio').style.display = 'flex';
     };
+
+    // INICIALIZACIÓN DE LA SESIÓN AL CARGAR LA PÁGINA
+    window.addEventListener('DOMContentLoaded', async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        usuarioSesion = session.user;
+        cargarPanelUsuario();
+      }
+
+      const hoy = new Date();
+      const mesStr = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0');
+      document.getElementById('selected-month').value = mesStr;
+    });
   </script>
 </body>
 </html>
@@ -862,7 +865,7 @@ def importar_excel():
     try:
         assert file.filename is not None
         if file.filename.endswith('.csv'):
-            df = pd.read_csv(file) # type: ignore
+            df = pd.read_csv(file)
         else:
             df = pd.read_excel(file)
 
