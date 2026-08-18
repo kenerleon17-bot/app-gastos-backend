@@ -333,7 +333,7 @@ HTML_CONTENT = r"""
           </button>
         </div>
       </form>
-  </div>
+    </div>
   </div>
 
   <!-- SELECCIÓN DE PERSONA -->
@@ -480,359 +480,358 @@ HTML_CONTENT = r"""
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) return alert("Error al iniciar sesión: " + error.message);
-      	usuarioSesion = data.user;
-  	    await cargarPanelUsuario();
-  	  }
-  	};
+        usuarioSesion = data.user;
+        await cargarPanelUsuario();
+      }
+    };
 
-  	async function cargarPanelUsuario() {
-  	  document.getElementById('vista-auth').style.display = 'none';
-  	  document.getElementById('vista-inicio').style.display = 'flex';
-  	  document.getElementById('user-display-email').innerText = usuarioSesion.email;
-  	  document.getElementById('badge-email-header').innerText = usuarioSesion.email;
+    async function cargarPanelUsuario() {
+      document.getElementById('vista-auth').style.display = 'none';
+      document.getElementById('vista-inicio').style.display = 'flex';
+      document.getElementById('user-display-email').innerText = usuarioSesion.email;
+      document.getElementById('badge-email-header').innerText = usuarioSesion.email;
 
-  	  const selectDestino = document.getElementById('nombre-destino-excel');
-  	  selectDestino.innerHTML = ''; 
+      const selectDestino = document.getElementById('nombre-destino-excel');
+      selectDestino.innerHTML = ''; 
 
-  	  const { data, error } = await supabase
-  	    .from('control_gastos')
-  	    .select('nombre_persona')
-  	    .eq('user_id', usuarioSesion.id);
+      const { data, error } = await supabase
+        .from('control_gastos')
+        .select('nombre_persona')
+        .eq('user_id', usuarioSesion.id);
 
-  	  if (!error && data && data.length > 0) {
-  	    const perfilesUnicos = [...new Set(data.map(item => item.nombre_persona))];
-  	    
-  	    perfilesUnicos.forEach(perfil => {
-  	      const opt = document.createElement('option');
-  	      opt.value = perfil;
-  	      opt.textContent = perfil.charAt(0).toUpperCase() + perfil.slice(1);
-  	      selectDestino.appendChild(opt);
-  	    });
-  	  }
-  	}
+      if (!error && data && data.length > 0) {
+        const perfilesUnicos = [...new Set(data.map(item => item.nombre_persona))];
+        
+        perfilesUnicos.forEach(perfil => {
+          const opt = document.createElement('option');
+          opt.value = perfil;
+          opt.textContent = perfil.charAt(0).toUpperCase() + perfil.slice(1);
+          selectDestino.appendChild(opt);
+        });
+      }
+    }
 
-  	window.cerrarSesion = async function() {
-  	  await supabase.auth.signOut();
-  	  location.reload();
-  	};
+    window.cerrarSesion = async function() {
+      await supabase.auth.signOut();
+      location.reload();
+    };
 
-  	function parseMonto(str) {
-  	  if (!str) return 0;
-  	  let limpio = str.toString().replace(/\./g, '').replace(',', '.');
-  	  let val = parseFloat(limpio);
-  	  return isNaN(val) ? 0 : val;
-  	}
+    function parseMonto(str) {
+      if (!str) return 0;
+      let limpio = str.toString().replace(/\./g, '').replace(',', '.');
+      let val = parseFloat(limpio);
+      return isNaN(val) ? 0 : val;
+    }
 
-  	function formatMonto(num) {
-  	  return num.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  	}
+    function formatMonto(num) {
+      return num.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 
-  	window.cargarDatosUsuario = async function() {
-  	  const mes = document.getElementById('selected-month').value;
-  	  const tbody = document.getElementById('table-body');
-  	  tbody.innerHTML = '';
+    window.cargarDatosUsuario = async function() {
+      const mes = document.getElementById('selected-month').value;
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
 
-  	  if (!usuarioSesion || !nombrePersona) return;
+      if (!usuarioSesion || !nombrePersona) return;
 
-  	  const { data, error } = await supabase
-  	    .from('control_gastos')
-  	    .select('*')
-  	    .eq('user_id', usuarioSesion.id)
-  	    .eq('nombre_persona', nombrePersona)
-  	    .eq('mes', mes)
-  	    .maybeSingle();
+      const { data, error } = await supabase
+        .from('control_gastos')
+        .select('*')
+        .eq('user_id', usuarioSesion.id)
+        .eq('nombre_persona', nombrePersona)
+        .eq('mes', mes)
+        .maybeSingle();
 
-  	  if (data) {
-  	    datosUsuario = { ingresos: data.ingresos || "0,00", filas: data.filas || [] };
-  	  } else {
-  	    datosUsuario = { ingresos: "0,00", filas: [] };
-  	  }
+      if (data) {
+        datosUsuario = { ingresos: data.ingresos || "0,00", filas: data.filas || [] };
+      } else {
+        datosUsuario = { ingresos: "0,00", filas: [] };
+      }
 
-  	  document.getElementById('ingresos-input').value = datosUsuario.ingresos;
+      document.getElementById('ingresos-input').value = datosUsuario.ingresos;
 
-  	  const filasACargar = datosUsuario.filas;
+      const filasACargar = datosUsuario.filas;
 
-  	  if (filasACargar.length === 0) {
-  	    window.agregarFila(false);
-  	  } else {
-  	    filasACargar.forEach(item => {
-  	      const row = document.createElement('tr');
-  	      const isDisabled = !item.tieneCuotas;
-  	      row.innerHTML = `
-  	        <td><input type="date" class="cell-input input-fecha" value="${item.fecha || ''}" onchange="window.guardarDatosUsuario()"></td>
-  	        <td><input type="text" class="cell-input input-cat" list="categorias-list" value="${item.cat || ''}" onchange="window.guardarDatosUsuario()"></td>
-  	        <td><input type="text" class="cell-input input-detalle" value="${item.detalle || ''}" onchange="window.guardarDatosUsuario()"></td>
-  	        <td>
-  	          <div class="cuota-container">
-  	            <select class="select-cuotas-type" onchange="window.toggleModoCuotas(this)">
-  	              <option value="sin" ${!item.tieneCuotas ? 'selected' : ''}>Un pago</option>
-  	              <option value="con" ${item.tieneCuotas ? 'selected' : ''}>En cuotas</option>
-  	            </select>
-  	            <input type="text" class="cell-input input-cuota-val" value="${item.cuota || 'Un pago'}" style="text-align: center;" ${isDisabled ? 'disabled' : ''} onchange="window.guardarDatosUsuario()">
-  	          </div>
-  	        </td>
-  	        <td><input type="text" class="cell-input input-fin-val" value="${item.fin || 'Este mes'}" style="text-align: center;" ${isDisabled ? 'disabled' : ''} onchange="window.guardarDatosUsuario()"></td>
-  	        <td><input type="text" class="cell-input input-monto" value="${item.monto || '0,00'}" style="text-align: right; font-weight: 600;" oninput="window.calcularTotales()" onchange="window.guardarDatosUsuario()"></td>
-  	        <td style="text-align: center;">${crearSelectEstado(item.estado || 'Pendiente')}</td>
-  	        <td style="text-align: center;"><button onclick="window.borrarFila(this)" style="border:none; background:none; cursor:pointer;">❌</button></td>
-  	      `;
-  	      tbody.appendChild(row);
-  	    });
-  	  }
+      if (filasACargar.length === 0) {
+        window.agregarFila(false);
+      } else {
+        filasACargar.forEach(item => {
+          const row = document.createElement('tr');
+          const isDisabled = !item.tieneCuotas;
+          row.innerHTML = `
+            <td><input type="date" class="cell-input input-fecha" value="${item.fecha || ''}" onchange="window.guardarDatosUsuario()"></td>
+            <td><input type="text" class="cell-input input-cat" list="categorias-list" value="${item.cat || ''}" onchange="window.guardarDatosUsuario()"></td>
+            <td><input type="text" class="cell-input input-detalle" value="${item.detalle || ''}" onchange="window.guardarDatosUsuario()"></td>
+            <td>
+              <div class="cuota-container">
+                <select class="select-cuotas-type" onchange="window.toggleModoCuotas(this)">
+                  <option value="sin" ${!item.tieneCuotas ? 'selected' : ''}>Un pago</option>
+                  <option value="con" ${item.tieneCuotas ? 'selected' : ''}>En cuotas</option>
+                </select>
+                <input type="text" class="cell-input input-cuota-val" value="${item.cuota || 'Un pago'}" style="text-align: center;" ${isDisabled ? 'disabled' : ''} onchange="window.guardarDatosUsuario()">
+              </div>
+            </td>
+            <td><input type="text" class="cell-input input-fin-val" value="${item.fin || 'Este mes'}" style="text-align: center;" ${isDisabled ? 'disabled' : ''} onchange="window.guardarDatosUsuario()"></td>
+            <td><input type="text" class="cell-input input-monto" value="${item.monto || '0,00'}" style="text-align: right; font-weight: 600;" oninput="window.calcularTotales()" onchange="window.guardarDatosUsuario()"></td>
+            <td style="text-align: center;">${crearSelectEstado(item.estado || 'Pendiente')}</td>
+            <td style="text-align: center;"><button onclick="window.borrarFila(this)" style="border:none; background:none; cursor:pointer;">❌</button></td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
 
-  	  window.calcularTotales();
-  	};
+      window.calcularTotales();
+    };
 
-  	window.guardarDatosUsuario = async function() {
-  	  if (!nombrePersona || !usuarioSesion) return;
+    window.guardarDatosUsuario = async function() {
+      if (!nombrePersona || !usuarioSesion) return;
 
-  	  const mes = document.getElementById('selected-month').value;
-  	  const rows = document.querySelectorAll('#table-body tr');
-  	  const filas = [];
+      const mes = document.getElementById('selected-month').value;
+      const rows = document.querySelectorAll('#table-body tr');
+      const filas = [];
 
-  	  rows.forEach(row => {
-  	    const fecha = row.querySelector('.input-fecha')?.value || "";
-  	    const cat = row.querySelector('.input-cat')?.value || "";
-  	    const detalle = row.querySelector('.input-detalle')?.value || "";
-  	    const tieneCuotas = row.querySelector('.select-cuotas-type')?.value === 'con';
-  	    const cuota = row.querySelector('.input-cuota-val')?.value || "";
-  	    const fin = row.querySelector('.input-fin-val')?.value || "";
-  	    const monto = row.querySelector('.input-monto')?.value || "0,00";
-  	    const estado = row.querySelector('.select-status')?.value || "Pendiente";
+      rows.forEach(row => {
+        const fecha = row.querySelector('.input-fecha')?.value || "";
+        const cat = row.querySelector('.input-cat')?.value || "";
+        const detalle = row.querySelector('.input-detalle')?.value || "";
+        const tieneCuotas = row.querySelector('.select-cuotas-type')?.value === 'con';
+        const cuota = row.querySelector('.input-cuota-val')?.value || "";
+        const fin = row.querySelector('.input-fin-val')?.value || "";
+        const monto = row.querySelector('.input-monto')?.value || "0,00";
+        const estado = row.querySelector('.select-status')?.value || "Pendiente";
 
-  	    if (detalle.trim() !== "" || parseMonto(monto) > 0) {
-  	      filas.push({ fecha, cat, detalle, tieneCuotas, cuota, fin, monto, estado });
-  	    }
-  	  });
+        if (detalle.trim() !== "" || parseMonto(monto) > 0) {
+          filas.push({ fecha, cat, detalle, tieneCuotas, cuota, fin, monto, estado });
+        }
+      });
 
-  	  const ingresosVal = document.getElementById('ingresos-input').value;
+      const ingresosVal = document.getElementById('ingresos-input').value;
 
-  	  const { error } = await supabase
-  	    .from('control_gastos')
-  	    .upsert({
-  	      user_id: usuarioSesion.id,
-  	      nombre_persona: nombrePersona,
-  	      mes: mes,
-  	      ingresos: ingresosVal,
-  	      filas: filas
-  	    }, { onConflict: 'user_id,nombre_persona,mes' });
+      const { error } = await supabase
+        .from('control_gastos')
+        .upsert({
+          user_id: usuarioSesion.id,
+          nombre_persona: nombrePersona,
+          mes: mes,
+          ingresos: ingresosVal,
+          filas: filas
+        }, { onConflict: 'user_id,nombre_persona,mes' });
 
-  	  if (error) {
-  	    console.error("Error guardando en Supabase:", error);
-  	  }
-  	};
+      if (error) {
+        console.error("Error guardando en Supabase:", error);
+      }
+    };
 
-  	window.irAArchivosPersona = function() {
+    window.irAArchivosPersona = function() {
       const inputNom = document.getElementById('nombre-usuario').value.trim();
       if (!inputNom) return alert('Ingresa el nombre de la persona para continuar.');
 
-      // Normalizamos el nombre eliminando espacios de más y pasándolo a minúsculas exactas
       nombrePersona = inputNom.toLowerCase().replace(/\s+/g, '_');
       document.getElementById('user-display').innerText = inputNom;
-  
+ 
       document.getElementById('vista-inicio').style.display = 'none';
       document.getElementById('vista-panel').style.display = 'flex';
-  
+ 
       window.cargarDatosUsuario();
-  };
+    };
 
-  	window.volverAInicio = async function() {
-  	  document.getElementById('vista-panel').style.display = 'none';
-  	  document.getElementById('vista-inicio').style.display = 'flex';
-  	  await cargarPanelUsuario();
-  	};
+    window.volverAInicio = async function() {
+      document.getElementById('vista-panel').style.display = 'none';
+      document.getElementById('vista-inicio').style.display = 'flex';
+      await cargarPanelUsuario();
+    };
 
-  	window.toggleModoCuotas = function(selectElem) {
-  	  const parentRow = selectElem.closest('tr');
-  	  const inputCuota = parentRow.querySelector('.input-cuota-val');
-  	  const inputFin = parentRow.querySelector('.input-fin-val');
+    window.toggleModoCuotas = function(selectElem) {
+      const parentRow = selectElem.closest('tr');
+      const inputCuota = parentRow.querySelector('.input-cuota-val');
+      const inputFin = parentRow.querySelector('.input-fin-val');
 
-  	  if (selectElem.value === 'sin') {
-  	    inputCuota.value = "Un pago";
-  	    inputCuota.disabled = true;
-  	    inputFin.value = "Este mes";
-  	    inputFin.disabled = true;
-  	  } else {
-  	    inputCuota.value = "1 / 1";
-  	    inputCuota.disabled = false;
-  	    inputFin.disabled = false;
-  	  }
-  	  window.guardarDatosUsuario();
-  	};
+      if (selectElem.value === 'sin') {
+        inputCuota.value = "Un pago";
+        inputCuota.disabled = true;
+        inputFin.value = "Este mes";
+        inputFin.disabled = true;
+      } else {
+        inputCuota.value = "1 / 1";
+        inputCuota.disabled = false;
+        inputFin.disabled = false;
+      }
+      window.guardarDatosUsuario();
+    };
 
-  	function crearSelectEstado(estadoActual) {
-  	  const claseColor = getClaseEstado(estadoActual);
-  	  return `
-  	    <select class="select-status ${claseColor}" onchange="window.cambiarColorEstado(this)">
-  	      <option value="Pendiente" ${estadoActual === 'Pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
-  	      <option value="Pagado" ${estadoActual === 'Pagado' ? 'selected' : ''}>✅ Pagado / Al día</option>
-  	      <option value="Vencido" ${estadoActual === 'Vencido' ? 'selected' : ''}>🚨 Vencido</option>
-  	      <option value="En Cuotas" ${estadoActual === 'En Cuotas' ? 'selected' : ''}>💳 En Cuotas</option>
-  	    </select>
-  	  `;
-  	}
+    function crearSelectEstado(estadoActual) {
+      const claseColor = getClaseEstado(estadoActual);
+      return `
+        <select class="select-status ${claseColor}" onchange="window.cambiarColorEstado(this)">
+          <option value="Pendiente" ${estadoActual === 'Pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
+          <option value="Pagado" ${estadoActual === 'Pagado' ? 'selected' : ''}>✅ Pagado / Al día</option>
+          <option value="Vencido" ${estadoActual === 'Vencido' ? 'selected' : ''}>🚨 Vencido</option>
+          <option value="En Cuotas" ${estadoActual === 'En Cuotas' ? 'selected' : ''}>💳 En Cuotas</option>
+        </select>
+      `;
+    }
 
-  	function getClaseEstado(valor) {
-  	  if (valor === 'Pagado') return 'status-pagado';
-  	  if (valor === 'Vencido') return 'status-vencido';
-  	  if (valor === 'En Cuotas') return 'status-cuotas';
-  	  return 'status-pendiente';
-  	}
+    function getClaseEstado(valor) {
+      if (valor === 'Pagado') return 'status-pagado';
+      if (valor === 'Vencido') return 'status-vencido';
+      if (valor === 'En Cuotas') return 'status-cuotas';
+      return 'status-pendiente';
+    }
 
-  	window.cambiarColorEstado = function(selectElement) {
-  	  selectElement.className = 'select-status ' + getClaseEstado(selectElement.value);
-  	  window.guardarDatosUsuario();
-  	};
+    window.cambiarColorEstado = function(selectElement) {
+      selectElement.className = 'select-status ' + getClaseEstado(selectElement.value);
+      window.guardarDatosUsuario();
+    };
 
-  	window.calcularTotales = function() {
-  	  const filas = document.querySelectorAll('#table-body tr');
-  	  let totalGastos = 0;
+    window.calcularTotales = function() {
+      const filas = document.querySelectorAll('#table-body tr');
+      let totalGastos = 0;
 
-  	  filas.forEach(row => {
-  	    const inputMonto = row.querySelector('.input-monto');
-  	    if (inputMonto) {
-  	      totalGastos += parseMonto(inputMonto.value);
-  	    }
-  	  });
+      filas.forEach(row => {
+        const inputMonto = row.querySelector('.input-monto');
+        if (inputMonto) {
+          totalGastos += parseMonto(inputMonto.value);
+        }
+      });
 
-  	  const ingresosStr = document.getElementById('ingresos-input').value;
-  	  const totalIngresos = parseMonto(ingresosStr);
-  	  const ahorro = totalIngresos - totalGastos;
+      const ingresosStr = document.getElementById('ingresos-input').value;
+      const totalIngresos = parseMonto(ingresosStr);
+      const ahorro = totalIngresos - totalGastos;
 
-  	  document.getElementById('total-gastos-val').innerText = `$${formatMonto(totalGastos)}`;
+      document.getElementById('total-gastos-val').innerText = `$${formatMonto(totalGastos)}`;
 
-  	  const ahorroElem = document.getElementById('total-ahorro-val');
-  	  const ahorroCard = document.getElementById('ahorro-card');
-  	  ahorroElem.innerText = `$${formatMonto(ahorro)}`;
+      const ahorroElem = document.getElementById('total-ahorro-val');
+      const ahorroCard = document.getElementById('ahorro-card');
+      ahorroElem.innerText = `$${formatMonto(ahorro)}`;
 
-  	  if (ahorro < 0) {
-  	    ahorroCard.className = 'summary-card negative';
-  	    ahorroElem.style.color = 'var(--accent-red)';
-  	  } else {
-  	    ahorroCard.className = 'summary-card highlight';
-  	    ahorroElem.style.color = 'var(--accent-green)';
-  	  }
-  	};
+      if (ahorro < 0) {
+        ahorroCard.className = 'summary-card negative';
+        ahorroElem.style.color = 'var(--accent-red)';
+      } else {
+        ahorroCard.className = 'summary-card highlight';
+        ahorroElem.style.color = 'var(--accent-green)';
+      }
+    };
 
-  	window.marcarIngresoModificado = function() {
-  	  window.calcularTotales();
-  	  window.guardarDatosUsuario();
-  	};
+    window.marcarIngresoModificado = function() {
+      window.calcularTotales();
+      window.guardarDatosUsuario();
+    };
 
-  	window.agregarFila = function(autoSave = true) {
-  	  const tbody = document.getElementById('table-body');
-  	  const newRow = document.createElement('tr');
-  	  const mesActual = document.getElementById('selected-month').value || "2026-08";
+    window.agregarFila = function(autoSave = true) {
+      const tbody = document.getElementById('table-body');
+      const newRow = document.createElement('tr');
+      const mesActual = document.getElementById('selected-month').value || "2026-08";
 
-  	  newRow.innerHTML = `
-  	    <td><input type="date" class="cell-input input-fecha" value="${mesActual}-01" onchange="window.guardarDatosUsuario()"></td>
-  	    <td><input type="text" class="cell-input input-cat" list="categorias-list" placeholder="Categoría..." onchange="window.guardarDatosUsuario()"></td>
-  	    <td><input type="text" class="cell-input input-detalle" placeholder="Nuevo gasto..." onchange="window.guardarDatosUsuario()"></td>
-  	    <td>
-  	      <div class="cuota-container">
-  	        <select class="select-cuotas-type" onchange="window.toggleModoCuotas(this)">
-  	          <option value="sin" selected>Un pago</option>
-  	          <option value="con">En cuotas</option>
-  	        </select>
-  	        <input type="text" class="cell-input input-cuota-val" value="Un pago" style="text-align: center;" disabled onchange="window.guardarDatosUsuario()">
-  	      </div>
-  	    </td>
-  	    <td><input type="text" class="cell-input input-fin-val" value="Este mes" style="text-align: center;" disabled onchange="window.guardarDatosUsuario()"></td>
-  	    <td><input type="text" class="cell-input input-monto" value="0,00" style="text-align: right; font-weight: 600;" oninput="window.calcularTotales()" onchange="window.guardarDatosUsuario()"></td>
-  	    <td style="text-align: center;">${crearSelectEstado('Pendiente')}</td>
-  	    <td style="text-align: center;"><button onclick="window.borrarFila(this)" style="border:none; background:none; cursor:pointer;">❌</button></td>
-  	  `;
-  	  tbody.appendChild(newRow);
-  	  window.calcularTotales();
+      newRow.innerHTML = `
+        <td><input type="date" class="cell-input input-fecha" value="${mesActual}-01" onchange="window.guardarDatosUsuario()"></td>
+        <td><input type="text" class="cell-input input-cat" list="categorias-list" placeholder="Categoría..." onchange="window.guardarDatosUsuario()"></td>
+        <td><input type="text" class="cell-input input-detalle" placeholder="Nuevo gasto..." onchange="window.guardarDatosUsuario()"></td>
+        <td>
+          <div class="cuota-container">
+            <select class="select-cuotas-type" onchange="window.toggleModoCuotas(this)">
+              <option value="sin" selected>Un pago</option>
+              <option value="con">En cuotas</option>
+            </select>
+            <input type="text" class="cell-input input-cuota-val" value="Un pago" style="text-align: center;" disabled onchange="window.guardarDatosUsuario()">
+          </div>
+        </td>
+        <td><input type="text" class="cell-input input-fin-val" value="Este mes" style="text-align: center;" disabled onchange="window.guardarDatosUsuario()"></td>
+        <td><input type="text" class="cell-input input-monto" value="0,00" style="text-align: right; font-weight: 600;" oninput="window.calcularTotales()" onchange="window.guardarDatosUsuario()"></td>
+        <td style="text-align: center;">${crearSelectEstado('Pendiente')}</td>
+        <td style="text-align: center;"><button onclick="window.borrarFila(this)" style="border:none; background:none; cursor:pointer;">❌</button></td>
+      `;
+      tbody.appendChild(newRow);
+      window.calcularTotales();
 
-  	  if (autoSave) {
-  	    window.guardarDatosUsuario();
-  	  }
-  	};
+      if (autoSave) {
+        window.guardarDatosUsuario();
+      }
+    };
 
-  	window.borrarFila = function(btn) {
-  	  btn.closest('tr').remove();
-  	  window.calcularTotales();
-  	  window.guardarDatosUsuario();
-  	};
+    window.borrarFila = function(btn) {
+      btn.closest('tr').remove();
+      window.calcularTotales();
+      window.guardarDatosUsuario();
+    };
 
-  	window.renovarMes = async function() {
-  	  await window.guardarDatosUsuario();
-  	  const picker = document.getElementById('selected-month');
-  	  const mesActual = picker.value;
+    window.renovarMes = async function() {
+      await window.guardarDatosUsuario();
+      const picker = document.getElementById('selected-month');
+      const mesActual = picker.value;
 
-  	  const [yearStr, monthStr] = mesActual.split('-');
-  	  let year = parseInt(yearStr, 10);
-  	  let month = parseInt(monthStr, 10);
+      const [yearStr, monthStr] = mesActual.split('-');
+      let year = parseInt(yearStr, 10);
+      let month = parseInt(monthStr, 10);
 
-  	  month++;
-  	  if (month > 12) {
-  	    month = 1;
-  	    year++;
-  	  }
+      month++;
+      if (month > 12) {
+        month = 1;
+        year++;
+      }
 
-  	  const mesSiguiente = `${year}-${String(month).padStart(2, '0')}`;
-  	  const nuevasFilas = [];
+      const mesSiguiente = `${year}-${String(month).padStart(2, '0')}`;
+      const nuevasFilas = [];
 
-  	  (datosUsuario.filas || []).forEach(item => {
-  	    let incluir = true;
-  	    let nuevaCuotaStr = item.cuota;
-  	    let nuevoEstado = "Pendiente";
+      (datosUsuario.filas || []).forEach(item => {
+        let incluir = true;
+        let nuevaCuotaStr = item.cuota;
+        let nuevoEstado = "Pendiente";
 
-  	    if (item.tieneCuotas && item.cuota && item.cuota.includes('/')) {
-  	      const partes = item.cuota.split('/');
-  	      let actual = parseInt(partes[0].trim(), 10);
-  	      const total = parseInt(partes[1].trim(), 10);
+        if (item.tieneCuotas && item.cuota && item.cuota.includes('/')) {
+          const partes = item.cuota.split('/');
+          let actual = parseInt(partes[0].trim(), 10);
+          const total = parseInt(partes[1].trim(), 10);
 
-  	      if (!isNaN(actual) && !isNaN(total)) {
-  	        actual++;
-  	        if (actual > total) {
-  	          incluir = false;
-  	        } else {
-  	          nuevaCuotaStr = `${actual} / ${total}`;
-  	          nuevoEstado = "En Cuotas";
-  	        }
-  	      }
-  	    }
+          if (!isNaN(actual) && !isNaN(total)) {
+            actual++;
+            if (actual > total) {
+              incluir = false;
+            } else {
+              nuevaCuotaStr = `${actual} / ${total}`;
+              nuevoEstado = "En Cuotas";
+            }
+          }
+        }
 
-  	    if (incluir) {
-  	      let dia = "01";
-  	      if (item.fecha && item.fecha.includes('-')) {
-  	        dia = item.fecha.split('-')[2];
-  	      }
+        if (incluir) {
+          let dia = "01";
+          if (item.fecha && item.fecha.includes('-')) {
+            dia = item.fecha.split('-')[2];
+          }
 
-  	      nuevasFilas.push({
-  	        ...item,
-  	        fecha: `${mesSiguiente}-${dia}`,
-  	        cuota: nuevaCuotaStr,
-  	        estado: nuevoEstado
-  	      });
-  	    }
-  	  });
+          nuevasFilas.push({
+            ...item,
+            fecha: `${mesSiguiente}-${dia}`,
+            cuota: nuevaCuotaStr,
+            estado: nuevoEstado
+          });
+        }
+      });
 
-  	  const { error } = await supabase
-  	    .from('control_gastos')
-  	    .upsert({
-  	      user_id: usuarioSesion.id,
-  	      nombre_persona: nombrePersona,
-  	      mes: mesSiguiente,
-  	      ingresos: datosUsuario.ingresos,
-  	      filas: nuevasFilas
-  	    }, { onConflict: 'user_id,nombre_persona,mes' });
+      const { error } = await supabase
+        .from('control_gastos')
+        .upsert({
+          user_id: usuarioSesion.id,
+          nombre_persona: nombrePersona,
+          mes: mesSiguiente,
+          ingresos: datosUsuario.ingresos,
+          filas: nuevasFilas
+        }, { onConflict: 'user_id,nombre_persona,mes' });
 
-  	  if (error) {
-  	    alert("Error al guardar en la nube: " + error.message);
-  	  } else {
-  	    picker.value = mesSiguiente;
-  	    await window.cargarDatosUsuario();
-  	    alert(`¡Clonado con éxito a ${mesSiguiente}! Guardado en la nube.`);
-  	  }
-  	};
+      if (error) {
+        alert("Error al guardar en la nube: " + error.message);
+      } else {
+        picker.value = mesSiguiente;
+        await window.cargarDatosUsuario();
+        alert(`¡Clonado con éxito a ${mesSiguiente}! Guardado en la nube.`);
+      }
+    };
 
-  	window.subirExcelWeb = function(input) {
-  	  if (!input.files || !input.files[0]) return;
+    window.subirExcelWeb = function(input) {
+      if (!input.files || !input.files[0]) return;
 
-  	  const file = input.files[0];
+      const file = input.files[0];
       const nombreDestino = document.getElementById('nombre-destino-excel').value;
 
       if (!nombreDestino) {
@@ -845,155 +844,73 @@ HTML_CONTENT = r"""
           return;
       }
 
-  	  const formData = new FormData();
-  	  formData.append('file', file);
+      const formData = new FormData();
+      formData.append('file', file);
       formData.append('nombre_destino', nombreDestino);
       formData.append('user_id', usuarioSesion.id);
       formData.append('mes', document.getElementById('selected-month').value);
 
-  	  fetch('/importar-excel', { method: 'POST', body: formData })
-  	  .then(res => res.json())
-  	  .then(data => {
-  	    if (data.error) alert('Error: ' + data.error);
-  	    else {
+      fetch('/importar-excel', { method: 'POST', body: formData })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) alert('Error: ' + data.error);
+        else {
             alert(data.message || 'Excel importado y guardado con éxito en el perfil');
             if (data.html) {
                 mostrarTablaExcelStandalone(data.html, data.filename);
             }
         }
-  	  })
-  	  .catch(err => alert('Error procesando archivo: ' + err));
-  	};
+      })
+      .catch(err => alert('Error procesando archivo: ' + err));
+    };
 
-  	function mostrarTablaExcelStandalone(htmlTabla, nombreArchivo) {
-  	  document.getElementById('vista-inicio').style.display = 'none';
-  	  document.getElementById('vista-panel').style.display = 'none';
-  	  document.getElementById('archivo-nombre').innerText = `Documento: ${nombreArchivo}`;
-  	  document.getElementById('tabla-wrapper-standalone').innerHTML = htmlTabla;
-  	  document.getElementById('vista-excel-standalone').style.display = 'block';
-  	}
+    window.mostrarTablaExcelStandalone = function(htmlTabla, nombreArchivo) {
+      document.getElementById('vista-inicio').style.display = 'none';
+      document.getElementById('vista-panel').style.display = 'none';
+      document.getElementById('archivo-nombre').innerText = `Documento: ${nombreArchivo}`;
+      document.getElementById('tabla-wrapper-standalone').innerHTML = htmlTabla;
+      document.getElementById('vista-excel-standalone').style.display = 'block';
+    }
 
-  	window.cerrarVistaExcelStandalone = function() {
-  	  document.getElementById('vista-excel-standalone').style.display = 'none';
-  	  document.getElementById('vista-inicio').style.display = 'flex';
-  	};
-
-  	window.addEventListener('DOMContentLoaded', async () => {
-  	  const { data: { session } } = await supabase.auth.getSession();
-  	  if (session) {
-  	    usuarioSesion = session.user;
-  	    await cargarPanelUsuario();
-  	  }
-
-  	  const hoy = new Date();
-  	  const mesStr = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0');
-  	  document.getElementById('selected-month').value = mesStr;
-  	});
+    window.cerrarVistaExcelStandalone = function() {
+      document.getElementById('vista-excel-standalone').style.display = 'none';
+      document.getElementById('vista-inicio').style.display = 'flex';
+    }
   </script>
 </body>
 </html>
 """
 
 @app.route('/')
-def home():
+def index():
     return render_template_string(HTML_CONTENT)
 
 @app.route('/importar-excel', methods=['POST'])
 def importar_excel():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No se envió ningún archivo'}), 400
-
-    file = request.files['file']
-    nombre_destino = request.form.get('nombre_destino', '').lower()
-    user_id = request.form.get('user_id', '')
-    mes = request.form.get('mes', '2026-08')
-
-    if not nombre_destino or not user_id:
-        return jsonify({'error': 'Faltan datos de perfil o usuario.'}), 400
-
-    if file.filename == '':
-        return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
-
     try:
-        assert file.filename is not None
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        # Leer archivo usando Pandas
         if file.filename.endswith('.csv'):
             df = pd.read_csv(file)
         else:
             df = pd.read_excel(file)
 
-        df = df.fillna('')
-        
-        # Mapeo inteligente de filas al formato de la app
-        filas_convertidas = []
-        for _, row in df.iterrows():
-            # Intentamos extraer columnas de forma flexible o por nombre si existen
-            # Asumimos el orden del excel de prueba: Fecha, Categoria, Concepto, Modo, Fin, Monto, Estado
-            fecha = str(row.iloc[0]) if len(row) > 0 else f"{mes}-01"
-            cat = str(row.iloc[1]) if len(row) > 1 else "General"
-            detalle = str(row.iloc[2]) if len(row) > 2 else "Sin detalle"
-            cuota_val = str(row.iloc[3]) if len(row) > 3 else "Un pago"
-            fin_val = str(row.iloc[4]) if len(row) > 4 else "Este mes"
-            
-            # Limpiar monto
-            monto_raw = row.iloc[5] if len(row) > 5 else 0
-            if isinstance(monto_raw, (int, float)):
-                monto_str = f"{monto_raw:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-            else:
-                monto_str = str(monto_raw) or "0,00"
+        # Generar representación HTML de la tabla para visualizarla
+        html_table = df.to_html(classes='excel-table', index=False)
 
-            estado_val = str(row.iloc[6]) if len(row) > 6 else "Pendiente"
-            tiene_cuotas = "cuota" in cuota_val.lower() or "/" in cuota_val
-
-            filas_convertidas.append({
-                "fecha": fecha[:10] if len(fecha) >= 10 else f"{mes}-01",
-                "cat": cat,
-                "detalle": detalle,
-                "tieneCuotas": tiene_cuotas,
-                "cuota": cuota_val,
-                "fin": fin_val,
-                "monto": monto_str,
-                "estado": estado_val
-            })
-
-        # GUARDAR DIRECTAMENTE EN SUPABASE DESDE EL SERVIDOR
-        import urllib.request
-        import json
-
-        supabase_url = "https://kcjacyxeunhrupufdwbm.supabase.co"
-        supabase_key = "sb_publishable_-kKQxsIOsfOsdj9uO0hmyQ_hyba_RzL" # Usar tu service_role o anon key con permisos
-
-        payload = {
-            "user_id": user_id,
-            "nombre_persona": nombre_destino,
-            "mes": mes,
-            "ingresos": "0,00",
-            "filas": filas_convertidas
-        }
-
-        req = urllib.request.Request(
-            f"{supabase_url}/rest/v1/control_gastos",
-            data=json.dumps(payload).encode('utf-8'),
-            headers={
-                "Content-Type": "application/json",
-                "apikey": supabase_key,
-                "Authorization": f"Bearer {supabase_key}",
-                "Prefer": "resolution=merge-duplicates"
-            },
-            method="POST"
-        )
-
-        try:
-            with urllib.request.urlopen(req) as response:
-                pass
-        except Exception as sb_err:
-            print("Aviso en persistencia backend:", sb_err)
-
-        tabla_html = df.to_html(classes="excel-table", index=False, escape=False)
-        
         return jsonify({
-            'html': tabla_html, 
+            'message': 'Archivo procesado correctamente con Pandas',
             'filename': file.filename,
-            'message': f'¡Excel importado y guardado permanentemente en el perfil "{nombre_destino}"!'
+            'html': html_table
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
