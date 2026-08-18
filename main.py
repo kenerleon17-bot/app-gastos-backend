@@ -437,10 +437,10 @@ HTML_CONTENT = r"""
   </div>
 
   <script>
-    // ===== REEMPLAZA CON TUS CREDENCIALES DE SUPABASE =====
-    const SUPABASE_URL = "https://kcjacyxeunhrupufdwbm.supabase.co/rest/v1/; // La que copias de Data API
-    const SUPABASE_KEY = "sb_publishable_-kKQxsI0sf0sdj9u0hmyQ_hyba_--"; // Tu Publishable key
-    // =======================================================
+    // ===== CREDENCIALES DE SUPABASE CORREGIDAS =====
+    const SUPABASE_URL = "https://kcjacyxeunhrupufdwbm.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_-kKQxsI0sf0sdj9u0hmyQ_hyba_--";
+    // ===============================================
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -860,8 +860,9 @@ def importar_excel():
         return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
 
     try:
+        assert file.filename is not None
         if file.filename.endswith('.csv'):
-            df = pd.read_csv(file)
+            df = pd.read_csv(file) # type: ignore
         else:
             df = pd.read_excel(file)
 
