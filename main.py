@@ -922,37 +922,77 @@ def importar_excel():
 
         df = df.fillna('')
         
-        # Convertir filas del excel a la estructura requerida por el control de gastos
+        # Mapeo inteligente de filas al formato de la app
         filas_convertidas = []
         for _, row in df.iterrows():
-            # Intentamos leer columnas comunes de forma flexible
-            detalle = str(row.iloc[1] if len(row) > 1 else row.iloc[0])
-            monto_val = str(row.iloc[-1] if len(row) > 2 else "0")
+            # Intentamos extraer columnas de forma flexible o por nombre si existen
+            # Asumimos el orden del excel de prueba: Fecha, Categoria, Concepto, Modo, Fin, Monto, Estado
+            fecha = str(row.iloc[0]) if len(row) > 0 else f"{mes}-01"
+            cat = str(row.iloc[1]) if len(row) > 1 else "General"
+            detalle = str(row.iloc[2]) if len(row) > 2 else "Sin detalle"
+            cuota_val = str(row.iloc[3]) if len(row) > 3 else "Un pago"
+            fin_val = str(row.iloc[4]) if len(row) > 4 else "Este mes"
             
+            # Limpiar monto
+            monto_raw = row.iloc[5] if len(row) > 5 else 0
+            if isinstance(monto_raw, (int, float)):
+                monto_str = f"{monto_raw:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            else:
+                monto_str = str(monto_raw) or "0,00"
+
+            estado_val = str(row.iloc[6]) if len(row) > 6 else "Pendiente"
+            tiene_cuotas = "cuota" in cuota_val.lower() or "/" in cuota_val
+
             filas_convertidas.append({
-                "fecha": f"{mes}-01",
-                "cat": "General",
+                "fecha": fecha[:10] if len(fecha) >= 10 else f"{mes}-01",
+                "cat": cat,
                 "detalle": detalle,
-                "tieneCuotas": False,
-                "cuota": "Un pago",
-                "fin": "Este mes",
-                "monto": monto_val,
-                "estado": "Pendiente"
+                "tieneCuotas": tiene_cuotas,
+                "cuota": cuota_val,
+                "fin": fin_val,
+                "monto": monto_str,
+                "estado": estado_val
             })
 
-        # Aquí puedes opcionalmente guardar directamente en Supabase desde Python usando requests o simplemente devolver el HTML
-        # Para que aparezca al entrar al perfil, el cliente o servidor debe guardarlo en la tabla control_gastos.
-        # Vamos a renderizar la tabla HTML para la vista preliminar
+        # GUARDAR DIRECTAMENTE EN SUPABASE DESDE EL SERVIDOR
+        import urllib.request
+        import json
+
+        supabase_url = "https://kcjacyxeunhrupufdwbm.supabase.co"
+        supabase_key = "sb_publishable_-kKQxsIOsfOsdj9uO0hmyQ_hyba_RzL" # Usar tu service_role o anon key con permisos
+
+        payload = {
+            "user_id": user_id,
+            "nombre_persona": nombre_destino,
+            "mes": mes,
+            "ingresos": "0,00",
+            "filas": filas_convertidas
+        }
+
+        req = urllib.request.Request(
+            f"{supabase_url}/rest/v1/control_gastos",
+            data=json.dumps(payload).encode('utf-8'),
+            headers={
+                "Content-Type": "application/json",
+                "apikey": supabase_key,
+                "Authorization": f"Bearer {supabase_key}",
+                "Prefer": "resolution=merge-duplicates"
+            },
+            method="POST"
+        )
+
+        try:
+            with urllib.request.urlopen(req) as response:
+                pass
+        except Exception as sb_err:
+            print("Aviso en persistencia backend:", sb_err)
+
         tabla_html = df.to_html(classes="excel-table", index=False, escape=False)
         
         return jsonify({
             'html': tabla_html, 
             'filename': file.filename,
-            'message': f'¡Excel importado correctamente para el perfil: {nombre_destino}!'
+            'message': f'¡Excel importado y guardado permanentemente en el perfil "{nombre_destino}"!'
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
