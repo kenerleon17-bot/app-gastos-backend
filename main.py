@@ -3,7 +3,6 @@ import pandas as pd
 from flask import Flask, render_template_string, request, jsonify
 
 app = Flask(__name__)
-
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 HTML_CONTENT = r"""
@@ -12,8 +11,11 @@ HTML_CONTENT = r"""
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control Financiero - Plantilla Mensual</title>
+  <title>Control Financiero - Plantilla Mensual (Supabase Cloud)</title>
   <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- SDK de Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
@@ -176,10 +178,7 @@ HTML_CONTENT = r"""
       position: sticky;
       top: 0;
       z-index: 10;
-      cursor: grab;
     }
-
-    .excel-table th:active { cursor: grabbing; }
 
     .excel-table td {
       border: 1px solid var(--excel-border);
@@ -244,8 +243,6 @@ HTML_CONTENT = r"""
     .status-pendiente { background: #fff4ce; color: #797000; }
     .status-vencido { background: #fde8e8; color: #a80000; }
     .status-cuotas { background: #e1dfdd; color: #323130; }
-
-    .col-drag-handle { margin-right: 0.3rem; color: #a19f9d; }
 
     /* SECCIÓN INFERIOR DE TOTALES Y AHORRO */
     .summary-footer {
@@ -317,7 +314,7 @@ HTML_CONTENT = r"""
   <div class="welcome-wrapper" id="vista-auth">
     <div class="welcome-container">
       <h1 class="welcome-title" id="auth-titulo">Iniciar Sesión</h1>
-      <p class="welcome-subtitle" id="auth-subtitulo">Ingresa tus datos para continuar</p>
+      <p class="welcome-subtitle" id="auth-subtitulo">Ingresa tus datos para conectarte en la nube</p>
 
       <form class="form-user" onsubmit="procesarAuth(event)">
         <div>
@@ -343,11 +340,11 @@ HTML_CONTENT = r"""
   <div class="welcome-wrapper" id="vista-inicio" style="display: none;">
     <div class="welcome-container">
       <h1 class="welcome-title">Gestión de Gastos</h1>
-      <p class="welcome-subtitle">Selecciona una opción para comenzar (<span id="user-display-email" style="color: var(--primary-navy); font-weight: bold;"></span>)</p>
+      <p class="welcome-subtitle">Conectado como: <span id="user-display-email" style="color: var(--primary-navy); font-weight: bold;"></span></p>
 
       <div class="form-user">
         <div>
-          <label for="nombre-usuario">1. Nombre de la persona</label>
+          <label for="nombre-usuario">1. Nombre de la persona / Perfil</label>
           <input type="text" id="nombre-usuario" placeholder="Ej: Joaquín" autocomplete="off">
         </div>
 
@@ -395,13 +392,13 @@ HTML_CONTENT = r"""
         <table class="excel-table" id="finance-table">
           <thead>
             <tr>
-              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Fecha Venc.</th>
-              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Categoría</th>
-              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Concepto / Detalle</th>
-              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Modo / Cuotas</th>
-              <th draggable="true"><span class="col-drag-handle">⋮⋮</span>Fin de Pago</th>
-              <th draggable="true" style="text-align: right;"><span class="col-drag-handle">⋮⋮</span>Monto ($)</th>
-              <th draggable="true" style="text-align: center;"><span class="col-drag-handle">⋮⋮</span>Estado (Fijar)</th>
+              <th>Fecha Venc.</th>
+              <th>Categoría</th>
+              <th>Concepto / Detalle</th>
+              <th>Modo / Cuotas</th>
+              <th>Fin de Pago</th>
+              <th style="text-align: right;">Monto ($)</th>
+              <th style="text-align: center;">Estado (Fijar)</th>
               <th style="width: 40px; text-align: center;">⚙️</th>
             </tr>
           </thead>
@@ -440,36 +437,41 @@ HTML_CONTENT = r"""
   </div>
 
   <script>
+    // ===== REEMPLAZA CON TUS CREDENCIALES DE SUPABASE =====
+    const SUPABASE_URL = "https://kcjacyxeunhrupufdwbm.supabase.co/rest/v1/; // La que copias de Data API
+    const SUPABASE_KEY = "sb_publishable_-kKQxsI0sf0sdj9u0hmyQ_hyba_--"; // Tu Publishable key
+    // =======================================================
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     let modoRegistro = false;
-    let usuarioActual = null;
-    let nombreUsuarioClave = '';
+    let usuarioSesion = null;
+    let nombrePersona = '';
     let datosUsuario = { ingresos: "0,00", filas: [] };
 
-    // AUTENTICACIÓN
+    // AUTENTICACIÓN CON SUPABASE
     function alternarModoAuth() {
       modoRegistro = !modoRegistro;
       document.getElementById('auth-titulo').innerText = modoRegistro ? 'Crear Cuenta' : 'Iniciar Sesión';
-      document.getElementById('auth-subtitulo').innerText = modoRegistro ? 'Registra una nueva cuenta' : 'Ingresa tus datos para continuar';
+      document.getElementById('auth-subtitulo').innerText = modoRegistro ? 'Registra tu usuario en la nube' : 'Ingresa tus datos para conectarte en la nube';
       document.getElementById('auth-btn-submit').innerText = modoRegistro ? 'Registrarse' : 'Entrar';
       document.getElementById('auth-toggle-msg').innerText = modoRegistro ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate aquí';
     }
 
-    function procesarAuth(e) {
+    async function procesarAuth(e) {
       e.preventDefault();
-      const email = document.getElementById('auth-email').value.trim().toLowerCase();
-      const pass = document.getElementById('auth-pass').value;
-      let usuarios = JSON.parse(localStorage.getItem('usuarios_app') || '{}');
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-pass').value;
 
       if (modoRegistro) {
-        if (usuarios[email]) return alert('El correo ya está registrado.');
-        usuarios[email] = { password: pass };
-        localStorage.setItem('usuarios_app', JSON.stringify(usuarios));
-        alert('Cuenta creada exitosamente. Inicia sesión ahora.');
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) return alert("Error al registrarse: " + error.message);
+        alert("Registro exitoso. Si Supabase requiere confirmación de email, revisa tu casilla. Si no, ya puedes iniciar sesión.");
         alternarModoAuth();
       } else {
-        if (!usuarios[email] || usuarios[email].password !== pass) return alert('Correo o contraseña incorrectos.');
-        usuarioActual = email;
-        localStorage.setItem('sesion_activa', email);
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) return alert("Error al iniciar sesión: " + error.message);
+        usuarioSesion = data.user;
         cargarPanelUsuario();
       }
     }
@@ -477,14 +479,14 @@ HTML_CONTENT = r"""
     function cargarPanelUsuario() {
       document.getElementById('vista-auth').style.display = 'none';
       document.getElementById('vista-inicio').style.display = 'flex';
-      document.getElementById('user-display-email').innerText = usuarioActual;
-      document.getElementById('badge-email-header').innerText = usuarioActual;
+      document.getElementById('user-display-email').innerText = usuarioSesion.email;
+      document.getElementById('badge-email-header').innerText = usuarioSesion.email;
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const sesionGuardada = localStorage.getItem('sesion_activa');
-      if (sesionGuardada) {
-        usuarioActual = sesionGuardada;
+    window.addEventListener('DOMContentLoaded', async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        usuarioSesion = session.user;
         cargarPanelUsuario();
       }
 
@@ -493,14 +495,9 @@ HTML_CONTENT = r"""
       document.getElementById('selected-month').value = mesStr;
     });
 
-    function cerrarSesion() {
-      localStorage.removeItem('sesion_activa');
+    async function cerrarSesion() {
+      await supabase.auth.signOut();
       location.reload();
-    }
-
-    function obtenerClaveStorage() {
-      const mes = document.getElementById('selected-month').value || 'general';
-      return 'usuario_gastos_' + usuarioActual + '_' + nombreUsuarioClave + '_' + mes;
     }
 
     function parseMonto(str) {
@@ -514,26 +511,31 @@ HTML_CONTENT = r"""
       return num.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // CARGA Y GUARDADO
-    function cargarDatosUsuario() {
-      const mesAnno = document.getElementById('selected-month').value;
+    // CARGA Y GUARDADO EN LA NUBE (SUPABASE)
+    async function cargarDatosUsuario() {
+      const mes = document.getElementById('selected-month').value;
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
 
-      try {
-        const datosGuardados = localStorage.getItem(obtenerClaveStorage());
-        if (datosGuardados) {
-          datosUsuario = JSON.parse(datosGuardados);
-        } else {
-          datosUsuario = { ingresos: "0,00", filas: [] };
-        }
-      } catch (e) {
+      if (!usuarioSesion || !nombrePersona) return;
+
+      const { data, error } = await supabase
+        .from('control_gastos')
+        .select('*')
+        .eq('user_id', usuarioSesion.id)
+        .eq('nombre_persona', nombrePersona)
+        .eq('mes', mes)
+        .maybeSingle();
+
+      if (data) {
+        datosUsuario = { ingresos: data.ingresos || "0,00", filas: data.filas || [] };
+      } else {
         datosUsuario = { ingresos: "0,00", filas: [] };
       }
 
-      document.getElementById('ingresos-input').value = datosUsuario.ingresos || "0,00";
+      document.getElementById('ingresos-input').value = datosUsuario.ingresos;
 
-      const filasACargar = datosUsuario.filas || [];
+      const filasACargar = datosUsuario.filas;
 
       if (filasACargar.length === 0) {
         agregarFila(false);
@@ -566,9 +568,10 @@ HTML_CONTENT = r"""
       calcularTotales();
     }
 
-    function guardarDatosUsuario() {
-      if (!nombreUsuarioClave || !usuarioActual) return;
+    async function guardarDatosUsuario() {
+      if (!nombrePersona || !usuarioSesion) return;
 
+      const mes = document.getElementById('selected-month').value;
       const rows = document.querySelectorAll('#table-body tr');
       const filas = [];
 
@@ -587,19 +590,28 @@ HTML_CONTENT = r"""
         }
       });
 
-      datosUsuario = {
-        ingresos: document.getElementById('ingresos-input').value,
-        filas: filas
-      };
+      const ingresosVal = document.getElementById('ingresos-input').value;
 
-      localStorage.setItem(obtenerClaveStorage(), JSON.stringify(datosUsuario));
+      const { error } = await supabase
+        .from('control_gastos')
+        .upsert({
+          user_id: usuarioSesion.id,
+          nombre_persona: nombrePersona,
+          mes: mes,
+          ingresos: ingresosVal,
+          filas: filas
+        }, { onConflict: 'user_id,nombre_persona,mes' });
+
+      if (error) {
+        console.error("Error guardando en Supabase:", error);
+      }
     }
 
     function irAArchivosPersona() {
       const inputNom = document.getElementById('nombre-usuario').value.trim();
       if (!inputNom) return alert('Ingresa el nombre de la persona para continuar.');
 
-      nombreUsuarioClave = inputNom.toLowerCase();
+      nombrePersona = inputNom.toLowerCase();
       document.getElementById('user-display').innerText = inputNom;
       
       document.getElementById('vista-inicio').style.display = 'none';
@@ -727,8 +739,8 @@ HTML_CONTENT = r"""
       guardarDatosUsuario();
     }
 
-    function renovarMes() {
-      guardarDatosUsuario();
+    async function renovarMes() {
+      await guardarDatosUsuario();
       const picker = document.getElementById('selected-month');
       const mesActual = picker.value;
 
@@ -781,50 +793,24 @@ HTML_CONTENT = r"""
         }
       });
 
-      const claveSiguiente = 'usuario_gastos_' + usuarioActual + '_' + nombreUsuarioClave + '_' + mesSiguiente;
-      const datosSiguientes = {
-        ingresos: datosUsuario.ingresos,
-        filas: nuevasFilas
-      };
+      const { error } = await supabase
+        .from('control_gastos')
+        .upsert({
+          user_id: usuarioSesion.id,
+          nombre_persona: nombrePersona,
+          mes: mesSiguiente,
+          ingresos: datosUsuario.ingresos,
+          filas: nuevasFilas
+        }, { onConflict: 'user_id,nombre_persona,mes' });
 
-      localStorage.setItem(claveSiguiente, JSON.stringify(datosSiguientes));
-
-      picker.value = mesSiguiente;
-      cargarDatosUsuario();
-
-      alert(`¡Clonado con éxito a ${mesSiguiente}! Se mantuvieron tus ingresos y las cuotas avanzaron.`);
+      if (error) {
+        alert("Error al guardar en la nube: " + error.message);
+      } else {
+        picker.value = mesSiguiente;
+        await cargarDatosUsuario();
+        alert(`¡Clonado con éxito a ${mesSiguiente}! Guardado en la nube.`);
+      }
     }
-
-    // DRAG AND DROP COLUMNAS
-    const table = document.getElementById('finance-table');
-    let dragSrcIndex = null;
-
-    table.querySelectorAll('th').forEach((th, index) => {
-      if (!th.getAttribute('draggable')) return;
-
-      th.addEventListener('dragstart', (e) => {
-        dragSrcIndex = index;
-        e.dataTransfer.effectAllowed = 'move';
-      });
-
-      th.addEventListener('dragover', (e) => e.preventDefault());
-
-      th.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const targetIndex = index;
-        if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
-
-        const rows = table.rows;
-        for (let row of rows) {
-          const cells = row.children;
-          if (dragSrcIndex < targetIndex) {
-            row.insertBefore(cells[dragSrcIndex], cells[targetIndex].nextSibling);
-          } else {
-            row.insertBefore(cells[dragSrcIndex], cells[targetIndex]);
-          }
-        }
-      });
-    });
 
     // ARCHIVOS EXCEL EXTERNOS
     function subirExcelWeb(input) {
@@ -874,8 +860,8 @@ def importar_excel():
         return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
 
     try:
-        if file.filename.endswith('.csv'): # type: ignore
-            df = pd.read_csv(file) # type: ignore
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(file)
         else:
             df = pd.read_excel(file)
 
