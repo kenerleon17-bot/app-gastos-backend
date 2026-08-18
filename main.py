@@ -333,7 +333,7 @@ HTML_CONTENT = r"""
           </button>
         </div>
       </form>
-    </div>
+  </div>
   </div>
 
   <!-- SELECCIÓN DE PERSONA -->
@@ -351,9 +351,7 @@ HTML_CONTENT = r"""
         <div>
           <label for="nombre-destino-excel">Destino para importar Excel (Mover a...):</label>
           <select id="nombre-destino-excel">
-              <option value="Joaquin">Joaquin</option>
-              <option value="Harrison">Harrison</option>
-              <option value="General">General</option>
+              <!-- Se cargará dinámicamente: vacío si no hay perfiles creados -->
           </select>
         </div>
 
@@ -483,16 +481,37 @@ HTML_CONTENT = r"""
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) return alert("Error al iniciar sesión: " + error.message);
-        usuarioSesion = data.user;
-        cargarPanelUsuario();
+      	usuarioSesion = data.user;
+      	await cargarPanelUsuario();
       }
     };
 
-    function cargarPanelUsuario() {
+    async function cargarPanelUsuario() {
       document.getElementById('vista-auth').style.display = 'none';
       document.getElementById('vista-inicio').style.display = 'flex';
       document.getElementById('user-display-email').innerText = usuarioSesion.email;
       document.getElementById('badge-email-header').innerText = usuarioSesion.email;
+
+      // CONSULTAR PERFILES EXISTENTES EN SUPABASE
+      const selectDestino = document.getElementById('nombre-destino-excel');
+      selectDestino.innerHTML = ''; // Limpiar inicialmente (queda vacío si no hay perfiles)
+
+      const { data, error } = await supabase
+        .from('control_gastos')
+        .select('nombre_persona')
+        .eq('user_id', usuarioSesion.id);
+
+      if (!error && data && data.length > 0) {
+        // Obtener nombres únicos de perfiles creados
+        const perfilesUnicos = [...new Set(data.map(item => item.nombre_persona))];
+        
+        perfilesUnicos.forEach(perfil => {
+          const opt = document.createElement('option');
+          opt.value = perfil;
+          opt.textContent = perfil.charAt(0).toUpperCase() + perfil.slice(1);
+          selectDestino.appendChild(opt);
+        });
+      }
     }
 
     window.cerrarSesion = async function() {
@@ -604,6 +623,9 @@ HTML_CONTENT = r"""
 
       if (error) {
         console.error("Error guardando en Supabase:", error);
+      } else {
+        // Actualizar la lista de perfiles dinámicamente tras guardar cambios
+        await cargarPanelUsuario();
       }
     };
 
@@ -620,9 +642,10 @@ HTML_CONTENT = r"""
       window.cargarDatosUsuario();
     };
 
-    window.volverAInicio = function() {
+    window.volverAInicio = async function() {
       document.getElementById('vista-panel').style.display = 'none';
       document.getElementById('vista-inicio').style.display = 'flex';
+      await cargarPanelUsuario();
     };
 
     window.toggleModoCuotas = function(selectElem) {
@@ -818,6 +841,11 @@ HTML_CONTENT = r"""
       const file = input.files[0];
       const nombreDestino = document.getElementById('nombre-destino-excel').value;
 
+      if (!nombreDestino) {
+          alert("No hay ningún perfil creado todavía para asignar el Excel. Crea un perfil primero.");
+          return;
+      }
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('nombre_destino', nombreDestino);
@@ -853,8 +881,8 @@ HTML_CONTENT = r"""
     window.addEventListener('DOMContentLoaded', async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        usuarioSesion = session.user;
-        cargarPanelUsuario();
+      	usuarioSesion = session.user;
+    	await cargarPanelUsuario();
       }
 
       const hoy = new Date();
@@ -876,7 +904,10 @@ def importar_excel():
         return jsonify({'error': 'No se envió ningún archivo'}), 400
 
     file = request.files['file']
-    nombre_destino = request.form.get('nombre_destino', 'General').lower()
+    nombre_destino = request.form.get('nombre_destino', '').lower()
+
+    if not nombre_destino:
+        return jsonify({'error': 'No hay un perfil de destino seleccionado o creado.'}), 400
 
     if file.filename == '':
         return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
@@ -890,8 +921,6 @@ def importar_excel():
 
         df = df.fillna('')
         
-        # Opcional: Aquí puedes procesar las filas del DataFrame para adaptarlas a tu tabla si deseas mapearlas automáticamente
-        # Por ahora generamos la vista previa HTML estándar
         tabla_html = df.to_html(classes="excel-table", index=False, escape=False)
         
         return jsonify({
