@@ -351,7 +351,7 @@ HTML_CONTENT = r"""
         <div>
           <label for="nombre-destino-excel">Destino para importar Excel (Mover a...):</label>
           <select id="nombre-destino-excel">
-              <!-- Se cargará dinámicamente: vacío si no hay perfiles creados -->
+              <!-- Vacío si no hay perfiles creados -->
           </select>
         </div>
 
@@ -430,7 +430,7 @@ HTML_CONTENT = r"""
           <span class="summary-title">💰 Disponible para Ahorro</span>
           <span id="total-ahorro-val" class="summary-value" style="color: var(--accent-green);">$0,00</span>
         </div>
-      </footer>
+    </footer>
     </main>
   </div>
 
@@ -459,7 +459,6 @@ HTML_CONTENT = r"""
     let nombrePersona = '';
     let datosUsuario = { ingresos: "0,00", filas: [] };
 
-    // DEFINICIÓN DE FUNCIONES EN EL ÁMBITO GLOBAL
     window.alternarModoAuth = function() {
       modoRegistro = !modoRegistro;
       document.getElementById('auth-titulo').innerText = modoRegistro ? 'Crear Cuenta' : 'Iniciar Sesión';
@@ -492,9 +491,8 @@ HTML_CONTENT = r"""
       document.getElementById('user-display-email').innerText = usuarioSesion.email;
       document.getElementById('badge-email-header').innerText = usuarioSesion.email;
 
-      // CONSULTAR PERFILES EXISTENTES EN SUPABASE
       const selectDestino = document.getElementById('nombre-destino-excel');
-      selectDestino.innerHTML = ''; // Limpiar inicialmente (queda vacío si no hay perfiles)
+      selectDestino.innerHTML = ''; 
 
       const { data, error } = await supabase
         .from('control_gastos')
@@ -502,7 +500,6 @@ HTML_CONTENT = r"""
         .eq('user_id', usuarioSesion.id);
 
       if (!error && data && data.length > 0) {
-        // Obtener nombres únicos de perfiles creados
         const perfilesUnicos = [...new Set(data.map(item => item.nombre_persona))];
         
         perfilesUnicos.forEach(perfil => {
@@ -530,7 +527,6 @@ HTML_CONTENT = r"""
       return num.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // CARGA Y GUARDADO EN LA NUBE
     window.cargarDatosUsuario = async function() {
       const mes = document.getElementById('selected-month').value;
       const tbody = document.getElementById('table-body');
@@ -623,9 +619,6 @@ HTML_CONTENT = r"""
 
       if (error) {
         console.error("Error guardando en Supabase:", error);
-      } else {
-        // Actualizar la lista de perfiles dinámicamente tras guardar cambios
-        await cargarPanelUsuario();
       }
     };
 
@@ -824,7 +817,7 @@ HTML_CONTENT = r"""
           mes: mesSiguiente,
           ingresos: datosUsuario.ingresos,
           filas: nuevasFilas
-        }, { onConflict: 'user_id,nombre_persona,mes' });
+       }, { onConflict: 'user_id,nombre_persona,mes' });
 
       if (error) {
         alert("Error al guardar en la nube: " + error.message);
@@ -877,12 +870,11 @@ HTML_CONTENT = r"""
       document.getElementById('vista-inicio').style.display = 'flex';
     };
 
-    // INICIALIZACIÓN DE LA SESIÓN AL CARGAR LA PÁGINA
     window.addEventListener('DOMContentLoaded', async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-      	usuarioSesion = session.user;
-    	await cargarPanelUsuario();
+    	usuarioSesion = session.user;
+  	    await cargarPanelUsuario();
       }
 
       const hoy = new Date();
