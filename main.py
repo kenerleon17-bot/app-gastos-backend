@@ -437,7 +437,7 @@ HTML_CONTENT = r"""
   </div>
 
   <script>
-    // ===== CREDENCIALES DE SUPABASE CORREGIDAS =====
+    // ===== CREDENCIALES DE SUPABASE =====
     const SUPABASE_URL = "https://kcjacyxeunhrupufdwbm.supabase.co";
     const SUPABASE_KEY = "sb_publishable_-kKQxsI0sf0sdj9u0hmyQ_hyba_--";
     // ===============================================
@@ -449,16 +449,16 @@ HTML_CONTENT = r"""
     let nombrePersona = '';
     let datosUsuario = { ingresos: "0,00", filas: [] };
 
-    // AUTENTICACIÓN CON SUPABASE
-    function alternarModoAuth() {
+    // EXPOSICIÓN GLOBAL DE FUNCIONES PRINCIPALES
+    window.alternarModoAuth = function() {
       modoRegistro = !modoRegistro;
       document.getElementById('auth-titulo').innerText = modoRegistro ? 'Crear Cuenta' : 'Iniciar Sesión';
       document.getElementById('auth-subtitulo').innerText = modoRegistro ? 'Registra tu usuario en la nube' : 'Ingresa tus datos para conectarte en la nube';
       document.getElementById('auth-btn-submit').innerText = modoRegistro ? 'Registrarse' : 'Entrar';
       document.getElementById('auth-toggle-msg').innerText = modoRegistro ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate aquí';
-    }
+    };
 
-    async function procesarAuth(e) {
+    window.procesarAuth = async function(e) {
       e.preventDefault();
       const email = document.getElementById('auth-email').value.trim();
       const password = document.getElementById('auth-pass').value;
@@ -467,14 +467,14 @@ HTML_CONTENT = r"""
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) return alert("Error al registrarse: " + error.message);
         alert("Registro exitoso. Si Supabase requiere confirmación de email, revisa tu casilla. Si no, ya puedes iniciar sesión.");
-        alternarModoAuth();
+        window.alternarModoAuth();
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) return alert("Error al iniciar sesión: " + error.message);
         usuarioSesion = data.user;
         cargarPanelUsuario();
       }
-    }
+    };
 
     function cargarPanelUsuario() {
       document.getElementById('vista-auth').style.display = 'none';
@@ -495,10 +495,10 @@ HTML_CONTENT = r"""
       document.getElementById('selected-month').value = mesStr;
     });
 
-    async function cerrarSesion() {
+    window.cerrarSesion = async function() {
       await supabase.auth.signOut();
       location.reload();
-    }
+    };
 
     function parseMonto(str) {
       if (!str) return 0;
@@ -512,7 +512,7 @@ HTML_CONTENT = r"""
     }
 
     // CARGA Y GUARDADO EN LA NUBE (SUPABASE)
-    async function cargarDatosUsuario() {
+    window.cargarDatosUsuario = async function() {
       const mes = document.getElementById('selected-month').value;
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
@@ -538,7 +538,7 @@ HTML_CONTENT = r"""
       const filasACargar = datosUsuario.filas;
 
       if (filasACargar.length === 0) {
-        agregarFila(false);
+        window.agregarFila(false);
       } else {
         filasACargar.forEach(item => {
           const row = document.createElement('tr');
@@ -565,10 +565,10 @@ HTML_CONTENT = r"""
         });
       }
 
-      calcularTotales();
-    }
+      window.calcularTotales();
+    };
 
-    async function guardarDatosUsuario() {
+    window.guardarDatosUsuario = async function() {
       if (!nombrePersona || !usuarioSesion) return;
 
       const mes = document.getElementById('selected-month').value;
@@ -605,9 +605,9 @@ HTML_CONTENT = r"""
       if (error) {
         console.error("Error guardando en Supabase:", error);
       }
-    }
+    };
 
-    function irAArchivosPersona() {
+    window.irAArchivosPersona = function() {
       const inputNom = document.getElementById('nombre-usuario').value.trim();
       if (!inputNom) return alert('Ingresa el nombre de la persona para continuar.');
 
@@ -617,15 +617,15 @@ HTML_CONTENT = r"""
       document.getElementById('vista-inicio').style.display = 'none';
       document.getElementById('vista-panel').style.display = 'flex';
       
-      cargarDatosUsuario();
-    }
+      window.cargarDatosUsuario();
+    };
 
-    function volverAInicio() {
+    window.volverAInicio = function() {
       document.getElementById('vista-panel').style.display = 'none';
       document.getElementById('vista-inicio').style.display = 'flex';
-    }
+    };
 
-    function toggleModoCuotas(selectElem) {
+    window.toggleModoCuotas = function(selectElem) {
       const parentRow = selectElem.closest('tr');
       const inputCuota = parentRow.querySelector('.input-cuota-val');
       const inputFin = parentRow.querySelector('.input-fin-val');
@@ -640,8 +640,8 @@ HTML_CONTENT = r"""
         inputCuota.disabled = false;
         inputFin.disabled = false;
       }
-      guardarDatosUsuario();
-    }
+      window.guardarDatosUsuario();
+    };
 
     function crearSelectEstado(estadoActual) {
       const claseColor = getClaseEstado(estadoActual);
@@ -662,12 +662,12 @@ HTML_CONTENT = r"""
       return 'status-pendiente';
     }
 
-    function cambiarColorEstado(selectElement) {
+    window.cambiarColorEstado = function(selectElement) {
       selectElement.className = 'select-status ' + getClaseEstado(selectElement.value);
-      guardarDatosUsuario();
-    }
+      window.guardarDatosUsuario();
+    };
 
-    function calcularTotales() {
+    window.calcularTotales = function() {
       const filas = document.querySelectorAll('#table-body tr');
       let totalGastos = 0;
 
@@ -695,14 +695,14 @@ HTML_CONTENT = r"""
         ahorroCard.className = 'summary-card highlight';
         ahorroElem.style.color = 'var(--accent-green)';
       }
-    }
+    };
 
-    function marcarIngresoModificado() {
-      calcularTotales();
-      guardarDatosUsuario();
-    }
+    window.marcarIngresoModificado = function() {
+      window.calcularTotales();
+      window.guardarDatosUsuario();
+    };
 
-    function agregarFila(autoSave = true) {
+    window.agregarFila = function(autoSave = true) {
       const tbody = document.getElementById('table-body');
       const newRow = document.createElement('tr');
       const mesActual = document.getElementById('selected-month').value || "2026-08";
@@ -726,21 +726,21 @@ HTML_CONTENT = r"""
         <td style="text-align: center;"><button onclick="borrarFila(this)" style="border:none; background:none; cursor:pointer;">❌</button></td>
       `;
       tbody.appendChild(newRow);
-      calcularTotales();
+      window.calcularTotales();
 
       if (autoSave) {
-        guardarDatosUsuario();
+        window.guardarDatosUsuario();
       }
-    }
+    };
 
-    function borrarFila(btn) {
+    window.borrarFila = function(btn) {
       btn.closest('tr').remove();
-      calcularTotales();
-      guardarDatosUsuario();
-    }
+      window.calcularTotales();
+      window.guardarDatosUsuario();
+    };
 
-    async function renovarMes() {
-      await guardarDatosUsuario();
+    window.renovarMes = async function() {
+      await window.guardarDatosUsuario();
       const picker = document.getElementById('selected-month');
       const mesActual = picker.value;
 
@@ -807,13 +807,13 @@ HTML_CONTENT = r"""
         alert("Error al guardar en la nube: " + error.message);
       } else {
         picker.value = mesSiguiente;
-        await cargarDatosUsuario();
+        await window.cargarDatosUsuario();
         alert(`¡Clonado con éxito a ${mesSiguiente}! Guardado en la nube.`);
       }
-    }
+    };
 
     // ARCHIVOS EXCEL EXTERNOS
-    function subirExcelWeb(input) {
+    window.subirExcelWeb = function(input) {
       if (!input.files || !input.files[0]) return;
 
       const file = input.files[0];
@@ -827,7 +827,7 @@ HTML_CONTENT = r"""
         else mostrarTablaExcelStandalone(data.html, data.filename);
       })
       .catch(err => alert('Error procesando archivo: ' + err));
-    }
+    };
 
     function mostrarTablaExcelStandalone(htmlTabla, nombreArchivo) {
       document.getElementById('vista-inicio').style.display = 'none';
@@ -837,40 +837,11 @@ HTML_CONTENT = r"""
       document.getElementById('vista-excel-standalone').style.display = 'block';
     }
 
-    function cerrarVistaExcelStandalone() {
+    window.cerrarVistaExcelStandalone = function() {
       document.getElementById('vista-excel-standalone').style.display = 'none';
       document.getElementById('vista-inicio').style.display = 'flex';
-    }
+    };
   </script>
-  <script>
-  // Exponer las funciones al ámbito global (window)
-  window.alternarModoAuth = function() {
-    modoRegistro = !modoRegistro;
-    document.getElementById('auth-titulo').innerText = modoRegistro ? 'Crear Cuenta' : 'Iniciar Sesión';
-    document.getElementById('auth-subtitulo').innerText = modoRegistro ? 'Registra tu usuario en la nube' : 'Ingresa tus datos para conectarte en la nube';
-    document.getElementById('auth-btn-submit').innerText = modoRegistro ? 'Registrarse' : 'Entrar';
-    document.getElementById('auth-toggle-msg').innerText = modoRegistro ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate aquí';
-  };
-
-  window.procesarAuth = async function(e) {
-    e.preventDefault();
-    const email = document.getElementById('auth-email').value.trim();
-    const password = document.getElementById('auth-pass').value;
-
-    if (modoRegistro) {
-      const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) return alert("Error al registrarse: " + error.message);
-      alert("Registro exitoso. Revisa tu email o inicia sesión.");
-      window.alternarModoAuth();
-    } else {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return alert("Error al iniciar sesión: " + error.message);
-      usuarioSesion = data.user;
-      cargarPanelUsuario();
-    }
-  };
-</script>
-
 </body>
 </html>
 """
