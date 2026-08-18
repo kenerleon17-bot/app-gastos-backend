@@ -842,6 +842,35 @@ HTML_CONTENT = r"""
       document.getElementById('vista-inicio').style.display = 'flex';
     }
   </script>
+  <script>
+  // Exponer las funciones al ámbito global (window)
+  window.alternarModoAuth = function() {
+    modoRegistro = !modoRegistro;
+    document.getElementById('auth-titulo').innerText = modoRegistro ? 'Crear Cuenta' : 'Iniciar Sesión';
+    document.getElementById('auth-subtitulo').innerText = modoRegistro ? 'Registra tu usuario en la nube' : 'Ingresa tus datos para conectarte en la nube';
+    document.getElementById('auth-btn-submit').innerText = modoRegistro ? 'Registrarse' : 'Entrar';
+    document.getElementById('auth-toggle-msg').innerText = modoRegistro ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate aquí';
+  };
+
+  window.procesarAuth = async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-pass').value;
+
+    if (modoRegistro) {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) return alert("Error al registrarse: " + error.message);
+      alert("Registro exitoso. Revisa tu email o inicia sesión.");
+      window.alternarModoAuth();
+    } else {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return alert("Error al iniciar sesión: " + error.message);
+      usuarioSesion = data.user;
+      cargarPanelUsuario();
+    }
+  };
+</script>
+
 </body>
 </html>
 """
