@@ -623,17 +623,18 @@ HTML_CONTENT = r"""
   	};
 
   	window.irAArchivosPersona = function() {
-  	  const inputNom = document.getElementById('nombre-usuario').value.trim();
-  	  if (!inputNom) return alert('Ingresa el nombre de la persona para continuar.');
+      const inputNom = document.getElementById('nombre-usuario').value.trim();
+      if (!inputNom) return alert('Ingresa el nombre de la persona para continuar.');
 
-  	  nombrePersona = inputNom.toLowerCase();
-  	  document.getElementById('user-display').innerText = inputNom;
-  	  
-  	  document.getElementById('vista-inicio').style.display = 'none';
-  	  document.getElementById('vista-panel').style.display = 'flex';
-  	  
-  	  window.cargarDatosUsuario();
-  	};
+      // Normalizamos el nombre eliminando espacios de más y pasándolo a minúsculas exactas
+      nombrePersona = inputNom.toLowerCase().replace(/\s+/g, '_');
+      document.getElementById('user-display').innerText = inputNom;
+  
+      document.getElementById('vista-inicio').style.display = 'none';
+      document.getElementById('vista-panel').style.display = 'flex';
+  
+      window.cargarDatosUsuario();
+  };
 
   	window.volverAInicio = async function() {
   	  document.getElementById('vista-panel').style.display = 'none';
