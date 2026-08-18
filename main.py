@@ -68,8 +68,8 @@ HTML_CONTENT = r"""
 
     .form-user { display: flex; flex-direction: column; gap: 1.2rem; text-align: left; }
     .form-user label { font-weight: 600; font-size: 0.9rem; color: var(--text-main); }
-    .form-user input { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid var(--excel-border); border-radius: 4px; font-size: 0.95rem; outline: none; }
-    .form-user input:focus { border-color: var(--excel-header); }
+    .form-user input, .form-user select { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid var(--excel-border); border-radius: 4px; font-size: 0.95rem; outline: none; background: #fff; }
+    .form-user input:focus, .form-user select:focus { border-color: var(--excel-header); }
 
     .btn-stack { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 0.5rem; }
 
@@ -348,10 +348,19 @@ HTML_CONTENT = r"""
           <input type="text" id="nombre-usuario" placeholder="Ej: Joaquín" autocomplete="off">
         </div>
 
+        <div>
+          <label for="nombre-destino-excel">Destino para importar Excel (Mover a...):</label>
+          <select id="nombre-destino-excel">
+              <option value="Joaquin">Joaquin</option>
+              <option value="Harrison">Harrison</option>
+              <option value="General">General</option>
+          </select>
+        </div>
+
         <div class="btn-stack">
           <button class="btn btn-excel" onclick="window.irAArchivosPersona()">📁 2. Ir a la Plantilla de Gastos</button>
           <input type="file" id="input-excel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="window.subirExcelWeb(this)">
-          <button class="btn btn-outline" onclick="document.getElementById('input-excel').click()">📊 Importar Excel Externo</button>
+          <button class="btn btn-outline" onclick="document.getElementById('input-excel').click()">📊 Importar Excel Inteligente</button>
           <button class="btn btn-outline" style="color: var(--accent-red);" onclick="window.cerrarSesion()">🚪 Cerrar Sesión</button>
         </div>
       </div>
@@ -807,14 +816,22 @@ HTML_CONTENT = r"""
       if (!input.files || !input.files[0]) return;
 
       const file = input.files[0];
+      const nombreDestino = document.getElementById('nombre-destino-excel').value;
+
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('nombre_destino', nombreDestino);
 
       fetch('/importar-excel', { method: 'POST', body: formData })
       .then(res => res.json())
       .then(data => {
         if (data.error) alert('Error: ' + data.error);
-        else mostrarTablaExcelStandalone(data.html, data.filename);
+        else {
+            alert(data.message || 'Excel importado y guardado con éxito');
+            if (data.html) {
+                mostrarTablaExcelStandalone(data.html, data.filename);
+            }
+        }
       })
       .catch(err => alert('Error procesando archivo: ' + err));
     };
@@ -859,6 +876,8 @@ def importar_excel():
         return jsonify({'error': 'No se envió ningún archivo'}), 400
 
     file = request.files['file']
+    nombre_destino = request.form.get('nombre_destino', 'General').lower()
+
     if file.filename == '':
         return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
 
@@ -870,8 +889,16 @@ def importar_excel():
             df = pd.read_excel(file)
 
         df = df.fillna('')
+        
+        # Opcional: Aquí puedes procesar las filas del DataFrame para adaptarlas a tu tabla si deseas mapearlas automáticamente
+        # Por ahora generamos la vista previa HTML estándar
         tabla_html = df.to_html(classes="excel-table", index=False, escape=False)
-        return jsonify({'html': tabla_html, 'filename': file.filename})
+        
+        return jsonify({
+            'html': tabla_html, 
+            'filename': file.filename,
+            'message': f'¡Excel importado correctamente para el perfil: {nombre_destino}!'
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
